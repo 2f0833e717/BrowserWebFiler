@@ -32,6 +32,7 @@ class Main {
       left: 0,
       right: 0
     };
+    this.initializeLogResize();
   }
 
   initializeEventListeners() {
@@ -324,6 +325,59 @@ class Main {
     logContent.appendChild(messageElement);
     // 最新のログが見えるようにスクロール
     logContent.scrollTop = logContent.scrollHeight;
+  }
+
+  initializeLogResize() {
+    const logContainer = document.querySelector('.log-container');
+    const logHeader = document.querySelector('.log-header');
+    let isDragging = false;
+    let startY;
+    let startHeight;
+
+    logHeader.addEventListener('mousedown', (e) => {
+      // ヘッダーの上部5pxの領域でのみドラッグを開始
+      if (e.offsetY <= 10) {
+        isDragging = true;
+        startY = e.clientY;
+        startHeight = logContainer.offsetHeight;
+        document.body.style.cursor = 'ns-resize';
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const deltaY = startY - e.clientY;
+      const newHeight = Math.min(
+        Math.max(startHeight + deltaY, 0), // 最小高さ100px
+        window.innerHeight * 1 // 最大高さ画面の80%
+      );
+
+      logContainer.style.height = `${newHeight}px`;
+      document.querySelector('.app-container').style.paddingBottom = `${newHeight}px`;
+      document.querySelector('.file-manager').style.height = 
+        `calc(100vh - ${newHeight}px - 50px)`;
+
+      e.preventDefault();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = '';
+      }
+    });
+
+    // ダブルクリックで高さをデフォルトに戻す
+    logHeader.addEventListener('dblclick', (e) => {
+      if (e.offsetY <= 10) {
+        const defaultHeight = window.innerHeight * 0.2; // 20vh
+        logContainer.style.height = `${defaultHeight}px`;
+        document.querySelector('.app-container').style.paddingBottom = `${defaultHeight}px`;
+        document.querySelector('.file-manager').style.height = 
+          `calc(100vh - ${defaultHeight}px - 50px)`;
+      }
+    });
   }
 }
 
