@@ -712,8 +712,15 @@ class Main {
         throw new Error('削除元のディレクトリが選択されていません');
       }
 
-      await handle.removeEntry(itemName, { recursive: true });
+      // 確認ダイアログを表示
+      const isDirectory = item.querySelector('.icon').textContent.includes('📁');
+      const type = isDirectory ? 'フォルダ' : 'ファイル';
+      if (!confirm(`${type}「${itemName}」を削除してもよろしいですか？`)) {
+        this.exitCommandMode();
+        return;
+      }
 
+      await handle.removeEntry(itemName, { recursive: true });
       await this.loadDirectoryContents(side);
 
       // フォーカスを維持
