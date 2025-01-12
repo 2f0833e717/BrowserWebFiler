@@ -9,8 +9,8 @@ class Main {
       right: null
     };
     this.currentPaths = {
-      left: '',  // 空文字列に変更
-      right: ''  // 空文字列に変更
+      left: '',
+      right: ''
     };
     this.handles = {
       left: null,
@@ -19,21 +19,16 @@ class Main {
     this.leftPane = document.querySelector('.left-pane .file-list');
     this.rightPane = document.querySelector('.right-pane .file-list');
     
-    if (!('showDirectoryPicker' in window)) {
-      this.logError(new Error('このブラウザはFile System Access APIをサポートしていません。'));
-      return;
-    }
-    
     this.initializeEventListeners();
     this.updatePathDisplay('left');
     this.updatePathDisplay('right');
-    this.lastFocusedPane = null; // フォーカスされているペインを追跡
+    this.lastFocusedPane = null;
     this.lastFocusedIndexes = {
       left: 0,
       right: 0
     };
     this.initializeLogResize();
-    this.commandMode = false;  // コマンドモードの状態管理を追加
+    this.commandMode = false;
   }
 
   initializeEventListeners() {
@@ -89,17 +84,39 @@ class Main {
       if (!focusedItem) return;
 
       switch (e.key) {
-        case ' ': // スペースキー
+        case ' ':
           this.toggleCommandMode(focusedItem);
           e.preventDefault();
           break;
 
         case 'm':
           if (this.commandMode) {
-            // コマンドモード中のmキーでファイル移動
             await this.moveFile(focusedItem);
           } else {
-            // 通常モード中のmキーでコマンドモードに移行
+            this.enableCommandMode(focusedItem);
+          }
+          e.preventDefault();
+          break;
+
+        case 'c':
+          if (this.commandMode) {
+            const itemName = focusedItem.querySelector('.name').textContent;
+            const isDirectory = focusedItem.querySelector('.icon').textContent.includes('📁');
+            if (isDirectory) {
+              await this.copyDirectory(focusedItem);
+            } else {
+              await this.copyFile(focusedItem);
+            }
+          } else {
+            this.enableCommandMode(focusedItem);
+          }
+          e.preventDefault();
+          break;
+
+        case 'd':
+          if (this.commandMode) {
+            await this.deleteFileOrDirectory(focusedItem);
+          } else {
             this.enableCommandMode(focusedItem);
           }
           e.preventDefault();
@@ -214,12 +231,12 @@ class Main {
     
     let newIndex = currentFocusedIndex;
     if (key === 'ArrowUp') {
-      // 上キーの場合、一番上なら移動しない
+      // 上移動不可
       if (currentFocusedIndex > 0) {
         newIndex = currentFocusedIndex - 1;
       }
     } else {
-      // 下キーの場合、一番下なら移動しない
+      // 下移動不可
       if (currentFocusedIndex < items.length - 1) {
         newIndex = currentFocusedIndex + 1;
       }
@@ -232,7 +249,7 @@ class Main {
     }
   }
 
-  // PageUp/PageDownの処理を追加
+  // PageUp/PageDown
   handlePageKey(position) {
     const pane = this.lastFocusedPane || document.querySelector('.left-pane');
     const items = Array.from(pane.querySelectorAll('.file-item'));
@@ -251,11 +268,9 @@ class Main {
         mode: 'read'
       });
       
-      // ルートハンドルとして保存
       this.rootHandles[side] = handle;
       this.currentHandles[side] = handle;
       
-      // パスを設定
       this.currentPaths[side] = handle.name;
       
       await this.loadDirectoryContents(side);
@@ -275,7 +290,6 @@ class Main {
       const newHandle = await handle.getDirectoryHandle(itemName);
       this.currentHandles[side] = newHandle;
       
-      // 新しいディレクトリの名前を使用
       const path = `${this.currentPaths[side]}\\${itemName}`;
       
       this.currentPaths[side] = path;
@@ -287,12 +301,10 @@ class Main {
       const items = Array.from(pane.querySelectorAll('.file-item'));
       if (items.length > 0) {
         this.focusFileItem(items[0]);
-        // lastFocusedPaneとlastFocusedIndexesも更新
         this.lastFocusedPane = pane.closest('.pane');
         this.lastFocusedIndexes[side] = 0;
       }
       
-      // ログにフルパスを表示
       this.logMessage(`移動したディレクトリ: ${path}`);
     } catch (error) {
       this.logError(error);
@@ -304,7 +316,7 @@ class Main {
       const currentHandle = this.currentHandles[side];
       if (!currentHandle) return;
 
-      // ルートディレクトリに到達した場合は移動しない
+      // ルートディレクトリに到達した場合は移動不可
       if (currentHandle === this.rootHandles[side]) {
         return;
       }
@@ -315,7 +327,6 @@ class Main {
       pathParts.pop();
       const parentPath = pathParts.join('\\');
 
-      // 新しいディレクトリを取得
       let newHandle = this.rootHandles[side];
       
       // ルート以外の場合は該当パスまで移動
@@ -328,7 +339,6 @@ class Main {
         }
       }
       
-      // 成功した場合のみハンドルとパスを更新
       this.currentHandles[side] = newHandle;
       this.currentPaths[side] = parentPath;
 
@@ -340,7 +350,6 @@ class Main {
       const items = Array.from(pane.querySelectorAll('.file-item'));
       if (items.length > 0) {
         this.focusFileItem(items[0]);
-        // lastFocusedPaneとlastFocusedIndexesも更新
         this.lastFocusedPane = pane.closest('.pane');
         this.lastFocusedIndexes[side] = 0;
       }
@@ -352,7 +361,6 @@ class Main {
   }
 
   async getDirectoryHandleByPath(path) {
-    // パスからディレクトリハンドルを取得するロジックを実装
     const parts = path.split('\\');
     let handle = await window.showDirectoryPicker();
     for (const part of parts) {
@@ -399,7 +407,7 @@ class Main {
 
   renderFileList(pane, entries) {
     pane.innerHTML = '';
-    // 一つ上の階層に移動するための「..」を追加
+    // 「..」追加
     const upEntry = { name: '..', isDirectory: true };
     entries.unshift(upEntry);
     entries.sort((a, b) => {
@@ -433,7 +441,6 @@ class Main {
     const timestamp = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}.${now.getMilliseconds()}`;
     messageElement.textContent = `${timestamp} - ${message}`;
     logContent.appendChild(messageElement);
-    // 最新のログが見えるようにスクロール
     logContent.scrollTop = logContent.scrollHeight;
   }
 
@@ -445,7 +452,7 @@ class Main {
     let startHeight;
 
     logHeader.addEventListener('mousedown', (e) => {
-      // ヘッダーの上部5pxの領域でのみドラッグを開始
+      // ヘッダーの上部領域でドラッグ
       if (e.offsetY <= 10) {
         isDragging = true;
         startY = e.clientY;
@@ -460,7 +467,7 @@ class Main {
       const deltaY = startY - e.clientY;
       const newHeight = Math.min(
         Math.max(startHeight + deltaY, 0), // 最小高さ100px
-        window.innerHeight * 1 // 最大高さ画面の80%
+        window.innerHeight * 1 // 最大高さ画面80%
       );
 
       logContainer.style.height = `${newHeight}px`;
@@ -478,7 +485,7 @@ class Main {
       }
     });
 
-    // ダブルクリックで高さをデフォルトに戻す
+    // ダブルクリックで高さデフォルト
     logHeader.addEventListener('dblclick', (e) => {
       if (e.offsetY <= 10) {
         const defaultHeight = window.innerHeight * 0.2; // 20vh
@@ -491,6 +498,7 @@ class Main {
   }
 
   async moveFile(item) {
+    // ファイル移動処理
     if (!item) return;
 
     try {
@@ -507,7 +515,6 @@ class Main {
       
       const isDirectory = item.querySelector('.icon').textContent.includes('📁');
 
-      // 移動元と移動先のハンドルを取得
       const sourceHandle = this.currentHandles[sourceSide];
       const targetHandle = this.currentHandles[targetSide];
 
@@ -516,13 +523,10 @@ class Main {
       }
 
       if (isDirectory) {
-        // フォルダの移動処理
         const sourceDir = await sourceHandle.getDirectoryHandle(sourceName);
         await this.moveDirectory(sourceDir, targetHandle, sourceName);
-        // 元のフォルダを削除
         await sourceHandle.removeEntry(sourceName, { recursive: true });
       } else {
-        // ファイルの移動処理
         const sourceFile = await sourceHandle.getFileHandle(sourceName);
         const targetFile = await targetHandle.getFileHandle(sourceName, { create: true });
         
@@ -531,15 +535,12 @@ class Main {
         await writable.write(file);
         await writable.close();
         
-        // 元のファイルを削除
         await sourceHandle.removeEntry(sourceName);
       }
 
-      // 両方のペインを更新
       await this.loadDirectoryContents(sourceSide);
       await this.loadDirectoryContents(targetSide);
 
-      // フォーカスを維持
       const targetPane = document.querySelector(`.${targetSide}-pane`);
       const items = Array.from(targetPane.querySelectorAll('.file-item'));
       if (items.length > 0) {
@@ -556,7 +557,7 @@ class Main {
   }
 
   async moveDirectory(sourceDir, targetParent, dirName) {
-    // フォルダの再帰的な移動処理
+    // フォルダ移動処理
     const newDir = await targetParent.getDirectoryHandle(dirName, { create: true });
     
     for await (const entry of sourceDir.values()) {
@@ -572,7 +573,7 @@ class Main {
     }
   }
 
-  // コマンドモードを有効にする
+  // コマンドモード
   enableCommandMode(item) {
     if (!item) return;
     
@@ -581,7 +582,7 @@ class Main {
     item.classList.add('command-focused');
   }
 
-  // スペースキーでのコマンドモード切り替え
+  // コマンドモード切替
   toggleCommandMode(item) {
     if (!item) return;
     
@@ -596,6 +597,7 @@ class Main {
   }
 
   exitCommandMode() {
+    // コマンドモード終了
     const commandFocusedItem = document.querySelector('.file-item.command-focused');
     if (commandFocusedItem) {
       commandFocusedItem.classList.remove('command-focused');
@@ -605,13 +607,13 @@ class Main {
   }
 
   async mirrorDirectory(sourceSide, targetSide) {
+    // ペイン同期
     try {
       const sourceHandle = this.currentHandles[sourceSide];
       if (!sourceHandle) {
         throw new Error('ミラー元のディレクトリが選択されていません');
       }
 
-      // ターゲット側のハンドルとパスを更新
       this.currentHandles[targetSide] = sourceHandle;
       this.currentPaths[targetSide] = this.currentPaths[sourceSide];
 
@@ -621,6 +623,122 @@ class Main {
       this.logMessage(`${sourceSide}ペインのディレクトリを${targetSide}ペインに同期しました`);
     } catch (error) {
       this.logError(error);
+    }
+  }
+
+  async copyFile(item) {
+    if (!item) return;
+
+    try {
+      const itemName = item.querySelector('.name').textContent;
+      const sourcePane = item.closest('.pane');
+      const sourceSide = sourcePane.classList.contains('left-pane') ? 'left' : 'right';
+      const targetSide = sourceSide === 'left' ? 'right' : 'left';
+
+      const sourceHandle = this.currentHandles[sourceSide];
+      const targetHandle = this.currentHandles[targetSide];
+
+      if (!sourceHandle || !targetHandle) {
+        throw new Error('コピー元またはコピー先のディレクトリが選択されていません');
+      }
+
+      const sourceFile = await sourceHandle.getFileHandle(itemName);
+      const targetFile = await targetHandle.getFileHandle(itemName, { create: true });
+
+      const file = await sourceFile.getFile();
+      const writable = await targetFile.createWritable();
+      await writable.write(file);
+      await writable.close();
+
+      await this.loadDirectoryContents(targetSide);
+      this.logMessage(`${itemName}を${sourceSide}から${targetSide}にコピーしました`);
+      this.exitCommandMode();
+    } catch (error) {
+      this.logError(error);
+      this.exitCommandMode();
+    }
+  }
+
+  async copyDirectory(item) {
+    if (!item) return;
+
+    try {
+      const itemName = item.querySelector('.name').textContent;
+      const sourcePane = item.closest('.pane');
+      const sourceSide = sourcePane.classList.contains('left-pane') ? 'left' : 'right';
+      const targetSide = sourceSide === 'left' ? 'right' : 'left';
+
+      const sourceHandle = this.currentHandles[sourceSide];
+      const targetHandle = this.currentHandles[targetSide];
+
+      if (!sourceHandle || !targetHandle) {
+        throw new Error('コピー元またはコピー先のディレクトリが選択されていません');
+      }
+
+      const sourceDir = await sourceHandle.getDirectoryHandle(itemName);
+      await this.copyDirectoryRecursive(sourceDir, targetHandle, itemName);
+
+      await this.loadDirectoryContents(targetSide);
+      this.logMessage(`${itemName}を${sourceSide}から${targetSide}にコピーしました`);
+      this.exitCommandMode();
+    } catch (error) {
+      this.logError(error);
+      this.exitCommandMode();
+    }
+  }
+
+  async copyDirectoryRecursive(sourceDir, targetParent, dirName) {
+    const newDir = await targetParent.getDirectoryHandle(dirName, { create: true });
+
+    for await (const entry of sourceDir.values()) {
+      if (entry.kind === 'file') {
+        const file = await entry.getFile();
+        const newFile = await newDir.getFileHandle(entry.name, { create: true });
+        const writable = await newFile.createWritable();
+        await writable.write(file);
+        await writable.close();
+      } else {
+        await this.copyDirectoryRecursive(entry, newDir, entry.name);
+      }
+    }
+  }
+
+  async deleteFileOrDirectory(item) {
+    if (!item) return;
+
+    try {
+      const itemName = item.querySelector('.name').textContent;
+      if (itemName === '..') {
+        this.logMessage('親ディレクトリは削除できません');
+        this.exitCommandMode();
+        return;
+      }
+
+      const pane = item.closest('.pane');
+      const side = pane.classList.contains('left-pane') ? 'left' : 'right';
+      const handle = this.currentHandles[side];
+
+      if (!handle) {
+        throw new Error('削除元のディレクトリが選択されていません');
+      }
+
+      await handle.removeEntry(itemName, { recursive: true });
+
+      await this.loadDirectoryContents(side);
+
+      // フォーカスを維持
+      const items = Array.from(pane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.focusFileItem(items[0]);
+        this.lastFocusedPane = pane.closest('.pane');
+        this.lastFocusedIndexes[side] = 0;
+      }
+
+      this.logMessage(`${itemName}を削除しました`);
+      this.exitCommandMode();
+    } catch (error) {
+      this.logError(error);
+      this.exitCommandMode();
     }
   }
 }
