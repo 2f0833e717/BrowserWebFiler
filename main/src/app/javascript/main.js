@@ -27,6 +27,7 @@ class Main {
     this.initializeEventListeners();
     this.updatePathDisplay('left');
     this.updatePathDisplay('right');
+    this.lastFocusedPane = null; // フォーカスされているペインを追跡
   }
 
   initializeEventListeners() {
@@ -66,7 +67,7 @@ class Main {
       });
     });
 
-    // キーボードイベント
+    // キーボードイベントを更新
     document.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         const focusedItem = document.querySelector('.file-item.focused');
@@ -82,8 +83,34 @@ class Main {
         }
       } else if (e.key === 'ArrowLeft') {
         await this.navigateUp('left');
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        this.handleArrowKeys(e.key);
       }
     });
+
+    // ペインのクリックでフォーカスを設定
+    document.querySelectorAll('.pane').forEach(pane => {
+      pane.addEventListener('click', () => {
+        this.lastFocusedPane = pane;
+      });
+    });
+  }
+
+  handleArrowKeys(key) {
+    const pane = this.lastFocusedPane || document.querySelector('.left-pane');
+    const items = Array.from(pane.querySelectorAll('.file-item'));
+    const currentFocusedIndex = items.findIndex(item => item.classList.contains('focused'));
+    
+    let newIndex;
+    if (key === 'ArrowUp') {
+      newIndex = currentFocusedIndex > 0 ? currentFocusedIndex - 1 : items.length - 1;
+    } else {
+      newIndex = currentFocusedIndex < items.length - 1 ? currentFocusedIndex + 1 : 0;
+    }
+
+    if (items[newIndex]) {
+      this.focusFileItem(items[newIndex]);
+    }
   }
 
   async selectDirectory(side) {
@@ -208,6 +235,7 @@ class Main {
   focusFileItem(item) {
     document.querySelectorAll('.file-item').forEach(el => el.classList.remove('focused'));
     item.classList.add('focused');
+    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   updatePathDisplay(side) {
