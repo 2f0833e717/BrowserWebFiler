@@ -41,16 +41,6 @@ class Main {
       });
     });
 
-    // ミラーボタン
-    document.querySelectorAll('.btn.mirror-dir').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const pane = e.target.closest('.pane');
-        const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-        const targetSide = side === 'left' ? 'right' : 'left';
-        await this.mirrorDirectory(side, targetSide);
-      });
-    });
-
     // ファイルリストのクリックイベント
     document.querySelectorAll('.file-list').forEach(list => {
       list.addEventListener('click', (e) => {
@@ -70,9 +60,9 @@ class Main {
           const side = pane.classList.contains('left-pane') ? 'left' : 'right';
           const itemName = item.querySelector('.name').textContent;
           if (itemName === '..') {
-            await this.navigateUp(side);
+            await this.changeParentDirectory(side);
           } else {
-            await this.openDirectory(side, itemName);
+            await this.changeDirectory(side, itemName);
           }
         }
       });
@@ -128,9 +118,9 @@ class Main {
             const side = pane.classList.contains('left-pane') ? 'left' : 'right';
             const itemName = focusedItem.querySelector('.name').textContent;
             if (itemName === '..') {
-              await this.navigateUp(side);
+              await this.changeParentDirectory(side);
             } else {
-              await this.openDirectory(side, itemName);
+              await this.changeDirectory(side, itemName);
             }
           }
           break;
@@ -146,7 +136,7 @@ class Main {
             if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('right-pane')) {
               this.switchPane('left');
             } else {
-              await this.navigateUp('left');
+              await this.changeParentDirectory('left');
             }
           }
           break;
@@ -156,7 +146,7 @@ class Main {
             if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('left-pane')) {
               this.switchPane('right');
             } else if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('right-pane')) {
-              await this.navigateUp('right');
+              await this.changeParentDirectory('right');
             }
           }
           break;
@@ -282,7 +272,7 @@ class Main {
     }
   }
 
-  async openDirectory(side, itemName) {
+  async changeDirectory(side, itemName) {
     try {
       const handle = this.currentHandles[side];
       if (!handle) return;
@@ -311,7 +301,7 @@ class Main {
     }
   }
 
-  async navigateUp(side) {
+  async changeParentDirectory(side) {
     try {
       const currentHandle = this.currentHandles[side];
       if (!currentHandle) return;
