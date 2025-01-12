@@ -108,6 +108,12 @@ body {
     border: 1px solid var(--primary-color);
 }
 
+.file-item.command-focused {
+    background-color: #5c2e2e; /* 濃い赤系の色 */
+    border: 2px solid #ff4444;
+    color: #ffffff;
+}
+
 /* ログエリア */
 .log-container {
     position: fixed;
