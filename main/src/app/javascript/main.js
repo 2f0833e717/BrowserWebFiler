@@ -28,6 +28,10 @@ class Main {
     this.updatePathDisplay('left');
     this.updatePathDisplay('right');
     this.lastFocusedPane = null; // フォーカスされているペインを追跡
+    this.lastFocusedIndexes = {
+      left: 0,
+      right: 0
+    };
   }
 
   initializeEventListeners() {
@@ -82,7 +86,20 @@ class Main {
           }
         }
       } else if (e.key === 'ArrowLeft') {
-        await this.navigateUp('left');
+        if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('right-pane')) {
+          // 右ペインから左ペインへ移動
+          this.switchPane('left');
+        } else {
+          await this.navigateUp('left');
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('left-pane')) {
+          // 左ペインから右ペインへ移動
+          this.switchPane('right');
+        } else if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('right-pane')) {
+          // 右ペインで右矢印キーを押した場合は上の階層へ移動
+          await this.navigateUp('right');
+        }
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         this.handleArrowKeys(e.key);
       }
@@ -91,9 +108,33 @@ class Main {
     // ペインのクリックでフォーカスを設定
     document.querySelectorAll('.pane').forEach(pane => {
       pane.addEventListener('click', () => {
-        this.lastFocusedPane = pane;
+        const side = pane.classList.contains('left-pane') ? 'left' : 'right';
+        this.switchPane(side);
       });
     });
+  }
+
+  switchPane(targetSide) {
+    // 現在のフォーカス位置を保存
+    if (this.lastFocusedPane) {
+      const currentSide = this.lastFocusedPane.classList.contains('left-pane') ? 'left' : 'right';
+      const items = Array.from(this.lastFocusedPane.querySelectorAll('.file-item'));
+      const currentIndex = items.findIndex(item => item.classList.contains('focused'));
+      if (currentIndex !== -1) {
+        this.lastFocusedIndexes[currentSide] = currentIndex;
+      }
+    }
+
+    // 対象のペインに切り替え
+    const targetPane = document.querySelector(`.${targetSide}-pane`);
+    this.lastFocusedPane = targetPane;
+
+    // 保存していたフォーカス位置を復元
+    const items = Array.from(targetPane.querySelectorAll('.file-item'));
+    if (items.length > 0) {
+      const targetIndex = Math.min(this.lastFocusedIndexes[targetSide], items.length - 1);
+      this.focusFileItem(items[targetIndex]);
+    }
   }
 
   handleArrowKeys(key) {
@@ -109,6 +150,8 @@ class Main {
     }
 
     if (items[newIndex]) {
+      const side = pane.classList.contains('left-pane') ? 'left' : 'right';
+      this.lastFocusedIndexes[side] = newIndex;
       this.focusFileItem(items[newIndex]);
     }
   }
