@@ -535,15 +535,6 @@ class Main {
       await this.loadDirectoryContents(targetSide);
       this.updatePathDisplay(targetSide);
 
-      // フォーカスを維持
-      const targetPane = document.querySelector(`.${targetSide}-pane`);
-      const items = Array.from(targetPane.querySelectorAll('.file-item'));
-      if (items.length > 0) {
-        this.focusFileItem(items[0]);
-        this.lastFocusedPane = targetPane.closest('.pane');
-        this.lastFocusedIndexes[targetSide] = 0;
-      }
-
       this.logMessage(`${sourceSide}ペインのディレクトリを${targetSide}ペインに同期しました`);
     } catch (error) {
       this.logError(error);
