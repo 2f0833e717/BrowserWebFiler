@@ -46,6 +46,16 @@ class Main {
       });
     });
 
+    // ミラーボタン
+    document.querySelectorAll('.btn.mirror-dir').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const pane = e.target.closest('.pane');
+        const side = pane.classList.contains('left-pane') ? 'left' : 'right';
+        const targetSide = side === 'left' ? 'right' : 'left';
+        await this.mirrorDirectory(side, targetSide);
+      });
+    });
+
     // ファイルリストのクリックイベント
     document.querySelectorAll('.file-list').forEach(list => {
       list.addEventListener('click', (e) => {
@@ -150,6 +160,16 @@ class Main {
         case 'PageDown':
           if (!this.commandMode) {
             this.handlePageKey('last');
+          }
+          break;
+
+        case 'O':
+          if (e.shiftKey) {
+            const pane = focusedItem.closest('.pane');
+            const side = pane.classList.contains('left-pane') ? 'left' : 'right';
+            const targetSide = side === 'left' ? 'right' : 'left';
+            await this.mirrorDirectory(side, targetSide);
+            e.preventDefault();
           }
           break;
       }
@@ -581,6 +601,26 @@ class Main {
       commandFocusedItem.classList.remove('command-focused');
       commandFocusedItem.classList.add('focused');
       this.commandMode = false;
+    }
+  }
+
+  async mirrorDirectory(sourceSide, targetSide) {
+    try {
+      const sourceHandle = this.currentHandles[sourceSide];
+      if (!sourceHandle) {
+        throw new Error('ミラー元のディレクトリが選択されていません');
+      }
+
+      // ターゲット側のハンドルとパスを更新
+      this.currentHandles[targetSide] = sourceHandle;
+      this.currentPaths[targetSide] = this.currentPaths[sourceSide];
+
+      await this.loadDirectoryContents(targetSide);
+      this.updatePathDisplay(targetSide);
+
+      this.logMessage(`${sourceSide}ペインのディレクトリを${targetSide}ペインに同期しました`);
+    } catch (error) {
+      this.logError(error);
     }
   }
 }
