@@ -487,6 +487,69 @@ class Main {
     });
   }
 
+  // コマンドモード
+  enableCommandMode(item) {
+    if (!item) return;
+    
+    this.commandMode = true;
+    item.classList.remove('focused');
+    item.classList.add('command-focused');
+  }
+
+  // コマンドモード切替
+  toggleCommandMode(item) {
+    if (!item) return;
+    
+    this.commandMode = !this.commandMode;
+    if (this.commandMode) {
+      item.classList.remove('focused');
+      item.classList.add('command-focused');
+    } else {
+      item.classList.remove('command-focused');
+      item.classList.add('focused');
+    }
+  }
+
+  exitCommandMode() {
+    // コマンドモード終了
+    const commandFocusedItem = document.querySelector('.file-item.command-focused');
+    if (commandFocusedItem) {
+      commandFocusedItem.classList.remove('command-focused');
+      commandFocusedItem.classList.add('focused');
+      this.commandMode = false;
+    }
+  }
+
+  async mirrorDirectory(sourceSide, targetSide) {
+    try {
+      const sourceHandle = this.currentHandles[sourceSide];
+      if (!sourceHandle) {
+        throw new Error('ミラー元のディレクトリが選択されていません');
+      }
+
+      // ターゲット側のルートハンドルと現在のハンドルを更新
+      this.rootHandles[targetSide] = this.rootHandles[sourceSide];
+      this.currentHandles[targetSide] = sourceHandle;
+      this.currentPaths[targetSide] = this.currentPaths[sourceSide];
+
+      await this.loadDirectoryContents(targetSide);
+      this.updatePathDisplay(targetSide);
+
+      // フォーカスを維持
+      const targetPane = document.querySelector(`.${targetSide}-pane`);
+      const items = Array.from(targetPane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.focusFileItem(items[0]);
+        this.lastFocusedPane = targetPane.closest('.pane');
+        this.lastFocusedIndexes[targetSide] = 0;
+      }
+
+      this.logMessage(`${sourceSide}ペインのディレクトリを${targetSide}ペインに同期しました`);
+    } catch (error) {
+      this.logError(error);
+    }
+  }
+
   async moveFile(item) {
     // ファイル移動処理
     if (!item) return;
@@ -503,7 +566,6 @@ class Main {
       const sourceSide = sourcePane.classList.contains('left-pane') ? 'left' : 'right';
       const targetSide = sourceSide === 'left' ? 'right' : 'left';
       
-      const isDirectory = item.querySelector('.icon').textContent.includes('📁');
 
       const sourceHandle = this.currentHandles[sourceSide];
       const targetHandle = this.currentHandles[targetSide];
@@ -560,59 +622,6 @@ class Main {
       } else {
         await this.moveDirectory(entry, newDir, entry.name);
       }
-    }
-  }
-
-  // コマンドモード
-  enableCommandMode(item) {
-    if (!item) return;
-    
-    this.commandMode = true;
-    item.classList.remove('focused');
-    item.classList.add('command-focused');
-  }
-
-  // コマンドモード切替
-  toggleCommandMode(item) {
-    if (!item) return;
-    
-    this.commandMode = !this.commandMode;
-    if (this.commandMode) {
-      item.classList.remove('focused');
-      item.classList.add('command-focused');
-    } else {
-      item.classList.remove('command-focused');
-      item.classList.add('focused');
-    }
-  }
-
-  exitCommandMode() {
-    // コマンドモード終了
-    const commandFocusedItem = document.querySelector('.file-item.command-focused');
-    if (commandFocusedItem) {
-      commandFocusedItem.classList.remove('command-focused');
-      commandFocusedItem.classList.add('focused');
-      this.commandMode = false;
-    }
-  }
-
-  async mirrorDirectory(sourceSide, targetSide) {
-    // ペイン同期
-    try {
-      const sourceHandle = this.currentHandles[sourceSide];
-      if (!sourceHandle) {
-        throw new Error('ミラー元のディレクトリが選択されていません');
-      }
-
-      this.currentHandles[targetSide] = sourceHandle;
-      this.currentPaths[targetSide] = this.currentPaths[sourceSide];
-
-      await this.loadDirectoryContents(targetSide);
-      this.updatePathDisplay(targetSide);
-
-      this.logMessage(`${sourceSide}ペインのディレクトリを${targetSide}ペインに同期しました`);
-    } catch (error) {
-      this.logError(error);
     }
   }
 
