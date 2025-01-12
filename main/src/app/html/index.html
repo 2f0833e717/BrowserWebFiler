@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web File Manager</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- 上部ナビゲーション -->
+    <div class="path-display">
+      <div class="path-left">
+        <span class="current-path">C:\</span>
+      </div>
+      <div class="path-right">
+        <span class="current-path">D:\</span>
+      </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="file-manager">
+      <!-- 左ペイン -->
+      <div class="pane left-pane">
+        <div class="toolbar">
+          <button class="btn select-dir">フォルダを選択</button>
+        </div>
+        <div class="file-list">
+          <!-- ファイルリストはJavaScriptで動的に生成 -->
+        </div>
+      </div>
+
+      <!-- 右ペイン -->
+      <div class="pane right-pane">
+        <div class="toolbar">
+          <button class="btn select-dir">フォルダを選択</button>
+        </div>
+        <div class="file-list">
+          <!-- ファイルリストはJavaScriptで動的に生成 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 下部ログ -->
+    <div class="log-container">
+      <div class="log-header">操作ログ</div>
+      <div class="log-content">
+        <!-- ログはJavaScriptで動的に生成 -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../javascript/main.js"></script>
+</body>
+</html>
