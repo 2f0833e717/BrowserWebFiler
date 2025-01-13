@@ -108,14 +108,6 @@ function initializeKeyEvents(mainInstance) {
           e.preventDefault();
         }
         break;
-      case 'S':
-        if (e.shiftKey) {
-          const pane = focusedItem.closest('.pane');
-          const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-          await mainInstance.syncDirectory(side);
-          e.preventDefault();
-        }
-        break;
     }
   });
 }
