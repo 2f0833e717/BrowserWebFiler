@@ -34,9 +34,16 @@ class Main {
   initializeEventListeners() {
     // ディレクトリ選択ボタン
     document.querySelectorAll('.btn.select-dir').forEach(btn => {
+      // mousedownイベントでフォーカスを防ぐ
+      btn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+      });
+      
       btn.addEventListener('click', async (e) => {
+        e.preventDefault();
         const pane = e.target.closest('.pane');
         const side = pane.classList.contains('left-pane') ? 'left' : 'right';
+        btn.blur(); // フォーカスを外す
         await this.selectDirectory(side);
       });
     });
@@ -265,6 +272,15 @@ class Main {
       
       await this.loadDirectoryContents(side);
       this.updatePathDisplay(side);
+      
+      // フォルダ選択後のフォーカス処理を追加
+      const pane = side === 'left' ? this.leftPane : this.rightPane;
+      const items = Array.from(pane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.focusFileItem(items[0]);
+        this.lastFocusedPane = pane.closest('.pane');
+        this.lastFocusedIndexes[side] = 0;
+      }
       
       this.logMessage(`選択されたディレクトリ: ${handle.name}`);
     } catch (error) {
@@ -743,3 +759,4 @@ class Main {
 document.addEventListener('DOMContentLoaded', () => {
   new Main();
 });
+
