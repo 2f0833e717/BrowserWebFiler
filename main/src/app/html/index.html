@@ -8,17 +8,6 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- 上部ナビゲーション -->
-    <div class="path-display">
-      <div class="path-left">
-        <span class="current-path">C:\</span>
-      </div>
-      <div class="path-right">
-        <span class="current-path">D:\</span>
-      </div>
-    </div>
-
-    <!-- メインコンテンツ -->
     <div class="file-manager">
       <!-- 左ペイン -->
       <div class="pane left-pane">
@@ -41,11 +30,25 @@
       </div>
     </div>
 
-    <!-- 下部ログ -->
-    <div class="log-container">
-      <div class="log-header">操作ログ</div>
-      <div class="log-content">
-        <!-- ログはJavaScriptで動的に生成 -->
+    <div class="bottom-container">
+      <div class="path-display">
+        <div class="path-container">
+          <div class="path-left">
+            <div class="current-path"></div>
+          </div>
+        </div>
+        <div class="path-container">
+          <div class="path-right">
+            <div class="current-path"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-container">
+        <div class="log-header">操作ログ</div>
+        <div class="log-content">
+          <!-- ログはJavaScriptで動的に生成 -->
+        </div>
       </div>
     </div>
   </div>

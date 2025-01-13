@@ -38,16 +38,88 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
+/* パス表示エリア (main.cssからの統合) */
+.path-display {
+  background: var(--background-color);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  height: 72px; /* 3行分の高さ (24px × 3) */
+  display: flex;
+  margin-bottom: 5px;
+}
+
+/* パス表示エリアの高さ調整 */
+.path-display {
+  height: auto;
+  min-height: 100px; /* 3行分 + パディング */
+  display: flex;
+  margin-bottom: 5px;
+}
+
+.path-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-right: 1px solid var(--border-color);
+  background: var(--secondary-color);
+  min-height: 100px;
+}
+
+.path-container:last-child {
+  border-right: none;
+}
+
+.path-left, .path-right {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.path-label {
+  flex-shrink: 0;
+  font-weight: bold;
+  color: var(--text-color);
+  padding-right: 8px;
+  user-select: none;
+}
+
+.current-path {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  color: var(--text-color);
+  height: 76px; /* 3行分の高さ (行高24px × 3) + パディング */
+  min-height: 76px;
+  line-height: 24px;
+}
+
+.current-path::-webkit-scrollbar {
+  height: 4px;
+}
+
+.current-path::-webkit-scrollbar-track {
+  background: #2a2a2a;
+}
+
+.current-path::-webkit-scrollbar-thumb {
+  background-color: #666;
+  border-radius: 2px;
+}
+
 .path-left,
 .path-right {
     flex: 1;
     padding: 4px 8px;
-}
-
-.current-path {
-    font-family: monospace;
-    font-size: 0.9rem;
-    color: var(--text-color);
 }
 
 /* ファイルマネージャーエリア */
@@ -58,6 +130,11 @@ body {
     min-height: 50px;
     height: calc(100vh - 20vh - 50px);
     overflow-y: auto;
+}
+
+/* ファイルマネージャーの高さ調整 */
+.file-manager {
+  height: calc(100vh - 230px) !important;
 }
 
 .pane {
@@ -116,12 +193,12 @@ body {
 
 /* ログエリア */
 .log-container {
-    position: fixed;
+    position: relative;
     bottom: 0;
     left: 0;
     right: 0;
     height: 20vh;
-    min-height: 50px;
+    min-height: 100px;
     max-height: 95vh;
     background-color: var(--background-color);
     border-top: 1px solid var(--border-color);
@@ -180,4 +257,29 @@ body {
     .file-manager {
         height: calc(100vh - 25vh - 50px);
     }
+
+    .path-display {
+        flex-direction: column;
+        height: auto;
+        min-height: 200px; /* 両方のパスコンテナの高さ分 */
+    }
+
+    .path-container {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 8px;
+        min-height: 100px;
+    }
+
+    .path-container:last-child {
+        border-bottom: none;
+    }
+}
+
+.bottom-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
