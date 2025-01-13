@@ -20,8 +20,6 @@ class Main {
     this.rightPane = document.querySelector('.right-pane .file-list');
     
     this.initializeEventListeners();
-    this.updatePathDisplay('left');
-    this.updatePathDisplay('right');
     this.lastFocusedPane = null;
     this.lastFocusedIndexes = {
       left: 0,
@@ -54,6 +52,9 @@ class Main {
 
     // キーハンドルの処理の初期化
     initializeKeyHandlers(this);
+
+    // ユーティリティ関数の初期化
+    initializeUtils(this);
   }
 
   initializeEventListeners() {
@@ -227,32 +228,6 @@ class Main {
     } catch (error) {
       this.logError(error);
     }
-  }
-
-  updatePathDisplay(side) {
-    const pathElement = document.querySelector(`.path-${side} .current-path`);
-    pathElement.textContent = this.currentPaths[side] || '';
-  }
-
-  renderFileList(pane, entries) {
-    pane.innerHTML = '';
-    // 「..」追加
-    const upEntry = { name: '..', isDirectory: true };
-    entries.unshift(upEntry);
-    entries.sort((a, b) => {
-      if (a.isDirectory !== b.isDirectory) {
-        return a.isDirectory ? -1 : 1;
-      }
-      return a.name.localeCompare(b.name);
-    }).forEach(entry => {
-      const element = document.createElement('div');
-      element.className = 'file-item';
-      element.innerHTML = `
-        <span class="icon">${entry.isDirectory ? '📁' : '📄'}</span>
-        <span class="name">${entry.name}</span>
-      `;
-      pane.appendChild(element);
-    });
   }
 }
 

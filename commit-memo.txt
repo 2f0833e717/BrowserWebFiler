@@ -36,7 +36,7 @@ git commit -m "ファイル分割 3フォーカス処理"
 git commit -m "ファイル分割 4コマンドモード"
 git commit -m "ファイル分割 5ファイル、フォルダ処理（移動、コピー、削除）"
 git commit -m "ファイル分割 6ペイン同期"
-git commit -m "ファイル分割 7キーハンドルの処理の中身の関数(handlePageKey、handleArrowKeys)"
+git commit -m "ファイル分割 7キーハンドルの処理の中身の関数"
 git commit -m "ファイル分割 8ユーティリティ"
 git commit -m "ファイル分割 1ログ"
 git commit -m "ファイル分割 1ログ"
@@ -57,20 +57,12 @@ git commit -m "ファイル分割 1ログ"
 分割した移動元の関数は削除してください。
 
 
-git commit -m "ファイル分割 7キーハンドルの処理の中身の関数(changeParentDirectory、changeDirectory)"
-
 
 
 
 
 getDirectoryHandleByPath
 削除
-
-
-ユーティリティ
-updatePathDisplay
-renderFileList
-
 
 
 loadDirectoryContentsCommonをそのままWithoutといっしょに統合
