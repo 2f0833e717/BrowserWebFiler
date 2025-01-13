@@ -39,6 +39,9 @@ class Main {
 
     // キーイベントの初期化
     initializeKeyEvents(this);
+
+    // フォーカス処理の初期化
+    initializeFocus(this);
   }
 
   initializeEventListeners() {
@@ -375,34 +378,6 @@ class Main {
     }
   }
 
-  focusFileItem(item) {
-    if (!item) return;
-
-    // 既存のフォーカスを解除
-    document.querySelectorAll('.file-item.focused, .file-item.command-focused').forEach(el => {
-      el.classList.remove('focused', 'command-focused');
-    });
-
-    // 新しいフォーカスを設定
-    if (this.commandMode) {
-      item.classList.add('command-focused');
-    } else {
-      item.classList.add('focused');
-    }
-
-    // ペインのフォーカス状態を更新
-    const pane = item.closest('.pane');
-    if (pane) {
-      this.lastFocusedPane = pane;
-      const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-      const items = Array.from(pane.querySelectorAll('.file-item'));
-      this.lastFocusedIndexes[side] = items.indexOf(item);
-    }
-
-    // スクロール位置の調整
-    item.scrollIntoView({ block: 'nearest' });
-  }
-
   updatePathDisplay(side) {
     const pathElement = document.querySelector(`.path-${side} .current-path`);
     pathElement.textContent = this.currentPaths[side] || '';
@@ -720,63 +695,6 @@ class Main {
     } catch (error) {
       this.logError(error);
       this.exitCommandMode();
-    }
-  }
-
-  // フォーカス位置を保存
-  saveFocusPosition(side) {
-    const pane = side === 'left' ? this.leftPane : this.rightPane;
-    const items = Array.from(pane.querySelectorAll('.file-item'));
-    const focusedItem = items.find(item => 
-      item.classList.contains('focused') || item.classList.contains('command-focused')
-    );
-    
-    if (focusedItem) {
-      // フォーカスされているアイテムの名前を取得
-      const focusedName = focusedItem.querySelector('.name').textContent;
-      const currentPath = this.currentPaths[side];
-      
-      // 現在のディレクトリ内でのフォーカスされているアイテム名を保存
-      this.focusHistory[side].set(currentPath, focusedName);
-      console.log(`保存したフォーカス位置 - ${side}:`, currentPath, focusedName);
-    }
-  }
-
-  // フォーカス位置を復元
-  restoreFocusPosition(side) {
-    const currentPath = this.currentPaths[side];
-    const savedName = this.focusHistory[side].get(currentPath);
-    
-    const pane = side === 'left' ? this.leftPane : this.rightPane;
-    const items = Array.from(pane.querySelectorAll('.file-item'));
-    
-    if (items.length > 0) {
-      if (savedName) {
-        // 保存されていたアイテム名と一致するアイテムを探す
-        const targetItem = items.find(item => 
-          item.querySelector('.name').textContent === savedName
-        );
-        
-        if (targetItem) {
-          // 一致するアイテムが見つかった場合、そのアイテムにフォーカス
-          this.focusFileItem(targetItem);
-          this.lastFocusedPane = pane.closest('.pane');
-          this.lastFocusedIndexes[side] = items.indexOf(targetItem);
-          console.log(`復元したフォーカス位置 - ${side}:`, currentPath, savedName);
-        } else {
-          // 一致するアイテムが見つからない場合は最初のアイテムにフォーカス
-          this.focusFileItem(items[0]);
-          this.lastFocusedPane = pane.closest('.pane');
-          this.lastFocusedIndexes[side] = 0;
-          console.log(`一致するアイテムが見つからないため、デフォルトフォーカス - ${side}:`, currentPath);
-        }
-      } else {
-        // 保存された位置がない場合は最初のアイテムにフォーカス
-        this.focusFileItem(items[0]);
-        this.lastFocusedPane = pane.closest('.pane');
-        this.lastFocusedIndexes[side] = 0;
-        console.log(`デフォルトフォーカス位置 - ${side}:`, currentPath);
-      }
     }
   }
 }
