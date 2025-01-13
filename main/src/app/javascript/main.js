@@ -42,6 +42,9 @@ class Main {
 
     // フォーカス処理の初期化
     initializeFocus(this);
+
+    // コマンドモードの初期化
+    initializeCommandMode(this);
   }
 
   initializeEventListeners() {
@@ -402,39 +405,6 @@ class Main {
       `;
       pane.appendChild(element);
     });
-  }
-
-  // コマンドモード
-  enableCommandMode(item) {
-    if (!item) return;
-    
-    this.commandMode = true;
-    item.classList.remove('focused');
-    item.classList.add('command-focused');
-  }
-
-  // コマンドモード切替
-  toggleCommandMode(item) {
-    if (!item) return;
-    
-    this.commandMode = !this.commandMode;
-    if (this.commandMode) {
-      item.classList.remove('focused');
-      item.classList.add('command-focused');
-    } else {
-      item.classList.remove('command-focused');
-      item.classList.add('focused');
-    }
-  }
-
-  exitCommandMode() {
-    // コマンドモード終了
-    const commandFocusedItem = document.querySelector('.file-item.command-focused');
-    if (commandFocusedItem) {
-      commandFocusedItem.classList.remove('command-focused');
-      commandFocusedItem.classList.add('focused');
-      this.commandMode = false;
-    }
   }
 
   async syncDirectory(fromSide) {
