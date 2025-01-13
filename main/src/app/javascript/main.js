@@ -36,6 +36,9 @@ class Main {
     // ログ機能の初期化
     initializeLog(this);
     this.initializeLogResize();
+
+    // キーイベントの初期化
+    initializeKeyEvents(this);
   }
 
   initializeEventListeners() {
@@ -80,127 +83,6 @@ class Main {
           }
         }
       });
-    });
-
-    // キーボードイベントを更新
-    document.addEventListener('keydown', async (e) => {
-      const focusedItem = document.querySelector('.file-item.focused, .file-item.command-focused');
-      if (!focusedItem) return;
-
-      switch (e.key) {
-        case ' ':
-          this.toggleCommandMode(focusedItem);
-          e.preventDefault();
-          break;
-
-        case 'm':
-          if (this.commandMode) {
-            await this.moveFile(focusedItem);
-          } else {
-            this.enableCommandMode(focusedItem);
-          }
-          e.preventDefault();
-          break;
-
-        case 'c':
-          if (this.commandMode) {
-            const itemName = focusedItem.querySelector('.name').textContent;
-            const isDirectory = focusedItem.querySelector('.icon').textContent.includes('📁');
-            if (isDirectory) {
-              await this.copyDirectory(focusedItem);
-            } else {
-              await this.copyFile(focusedItem);
-            }
-          } else {
-            this.enableCommandMode(focusedItem);
-          }
-          e.preventDefault();
-          break;
-
-        case 'd':
-          if (this.commandMode) {
-            await this.deleteFileOrDirectory(focusedItem);
-          } else {
-            this.enableCommandMode(focusedItem);
-          }
-          e.preventDefault();
-          break;
-
-        case 'Enter':
-          if (focusedItem && !this.commandMode) {
-            const pane = focusedItem.closest('.pane');
-            const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-            const itemName = focusedItem.querySelector('.name').textContent;
-            if (itemName === '..') {
-              await this.changeParentDirectory(side);
-            } else {
-              await this.changeDirectory(side, itemName);
-            }
-          }
-          break;
-
-        case 'Escape':
-          if (this.commandMode) {
-            this.exitCommandMode();
-          }
-          break;
-
-        case 'ArrowLeft':
-          if (!this.commandMode) {
-            if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('right-pane')) {
-              this.switchPane('left');
-            } else {
-              await this.changeParentDirectory('left');
-            }
-          }
-          break;
-
-        case 'ArrowRight':
-          if (!this.commandMode) {
-            if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('left-pane')) {
-              this.switchPane('right');
-            } else if (this.lastFocusedPane && this.lastFocusedPane.classList.contains('right-pane')) {
-              await this.changeParentDirectory('right');
-            }
-          }
-          break;
-
-        case 'ArrowUp':
-        case 'ArrowDown':
-          if (!this.commandMode) {
-            this.handleArrowKeys(e.key);
-          }
-          break;
-
-        case 'PageUp':
-          if (!this.commandMode) {
-            this.handlePageKey('first');
-          }
-          break;
-
-        case 'PageDown':
-          if (!this.commandMode) {
-            this.handlePageKey('last');
-          }
-          break;
-
-        case 'O':
-          if (e.shiftKey) {
-            const pane = focusedItem.closest('.pane');
-            const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-            await this.syncDirectory(side);
-            e.preventDefault();
-          }
-          break;
-        case 'S':
-          if (e.shiftKey) {
-            const pane = focusedItem.closest('.pane');
-            const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-            await this.syncDirectory(side);
-            e.preventDefault();
-          }
-          break;
-      }
     });
 
     // ペインのクリックでフォーカスを設定
