@@ -185,8 +185,15 @@ class Main {
           if (e.shiftKey) {
             const pane = focusedItem.closest('.pane');
             const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-            const targetSide = side === 'left' ? 'right' : 'left';
-            await this.mirrorDirectory(side, targetSide);
+            await this.syncDirectory(side);
+            e.preventDefault();
+          }
+          break;
+        case 'S':
+          if (e.shiftKey) {
+            const pane = focusedItem.closest('.pane');
+            const side = pane.classList.contains('left-pane') ? 'left' : 'right';
+            await this.syncDirectory(side);
             e.preventDefault();
           }
           break;
@@ -412,45 +419,51 @@ class Main {
     return handle;
   }
 
+  async loadDirectoryContentsCommon(side) {
+    const handle = this.currentHandles[side];
+    if (!handle) return;
+
+    const pane = side === 'left' ? this.leftPane : this.rightPane;
+    pane.innerHTML = '';
+
+    // 親ディレクトリへの移動用の項目を追加
+    const parentItem = document.createElement('div');
+    parentItem.className = 'file-item';
+    parentItem.innerHTML = `
+      <span class="icon">📁</span>
+      <span class="name">..</span>
+    `;
+    pane.appendChild(parentItem);
+
+    const entries = [];
+    for await (const entry of handle.values()) {
+      entries.push(entry);
+    }
+
+    // ディレクトリとファイルを分けてソート
+    const sortedEntries = entries.sort((a, b) => {
+      if (a.kind === b.kind) {
+        return a.name.localeCompare(b.name);
+      }
+      return a.kind === 'directory' ? -1 : 1;
+    });
+
+    for (const entry of sortedEntries) {
+      const item = document.createElement('div');
+      item.className = 'file-item';
+      item.innerHTML = `
+        <span class="icon">${entry.kind === 'directory' ? '📁' : '📄'}</span>
+        <span class="name">${entry.name}</span>
+      `;
+      pane.appendChild(item);
+    }
+
+    return pane;
+  }
+
   async loadDirectoryContents(side) {
     try {
-      const handle = this.currentHandles[side];
-      if (!handle) return;
-
-      const pane = side === 'left' ? this.leftPane : this.rightPane;
-      pane.innerHTML = '';
-
-      // 親ディレクトリへの移動用の項目を追加
-      const parentItem = document.createElement('div');
-      parentItem.className = 'file-item';
-      parentItem.innerHTML = `
-        <span class="icon">📁</span>
-        <span class="name">..</span>
-      `;
-      pane.appendChild(parentItem);
-
-      const entries = [];
-      for await (const entry of handle.values()) {
-        entries.push(entry);
-      }
-
-      // ディレクトリとファイルを分けてソート
-      const sortedEntries = entries.sort((a, b) => {
-        if (a.kind === b.kind) {
-          return a.name.localeCompare(b.name);
-        }
-        return a.kind === 'directory' ? -1 : 1;
-      });
-
-      for (const entry of sortedEntries) {
-        const item = document.createElement('div');
-        item.className = 'file-item';
-        item.innerHTML = `
-          <span class="icon">${entry.kind === 'directory' ? '📁' : '📄'}</span>
-          <span class="name">${entry.name}</span>
-        `;
-        pane.appendChild(item);
-      }
+      const pane = await this.loadDirectoryContentsCommon(side);
 
       // ディレクトリ読み込み後、フォーカスを設定
       const items = Array.from(pane.querySelectorAll('.file-item'));
@@ -464,6 +477,14 @@ class Main {
         this.lastFocusedPane = pane.closest('.pane');
         this.lastFocusedIndexes[side] = targetIndex;
       }
+    } catch (error) {
+      this.logError(error);
+    }
+  }
+
+  async loadDirectoryContentsWithoutFocus(side) {
+    try {
+      await this.loadDirectoryContentsCommon(side);
     } catch (error) {
       this.logError(error);
     }
@@ -627,24 +648,66 @@ class Main {
     }
   }
 
-  async mirrorDirectory(sourceSide, targetSide) {
+  async syncDirectory(fromSide) {
     try {
-      const sourceHandle = this.currentHandles[sourceSide];
-      if (!sourceHandle) {
-        throw new Error('ミラー元のディレクトリが選択されていません');
+      const toSide = fromSide === 'left' ? 'right' : 'left';
+      
+      // 同期元のペインとフォーカス情報を保存
+      const fromPane = fromSide === 'left' ? this.leftPane : this.rightPane;
+      const focusedItem = fromPane.querySelector('.file-item.focused, .file-item.command-focused');
+      const focusedIndex = focusedItem ? 
+        Array.from(fromPane.querySelectorAll('.file-item')).indexOf(focusedItem) : 0;
+
+      // ディレクトリの同期
+      this.currentHandles[toSide] = this.currentHandles[fromSide];
+      this.currentPaths[toSide] = this.currentPaths[fromSide];
+      this.rootHandles[toSide] = this.rootHandles[fromSide];
+
+      // 同期先のディレクトリ内容を更新
+      await this.loadDirectoryContentsWithoutFocus(toSide);
+      this.updatePathDisplay(toSide);
+
+      // 同期元のペインのフォーカスを強制的に復元
+      if (focusedItem) {
+        // 他のすべてのフォーカスを解除
+        document.querySelectorAll('.file-item').forEach(item => {
+          item.classList.remove('focused', 'command-focused');
+        });
+
+        // 同期元のアイテムにフォーカスを設定
+        if (this.commandMode) {
+          focusedItem.classList.add('command-focused');
+        } else {
+          focusedItem.classList.add('focused');
+        }
+
+        // フォーカス関連の状態を更新
+        this.lastFocusedPane = fromPane.closest('.pane');
+        this.lastFocusedIndexes[fromSide] = focusedIndex;
       }
 
-      // ターゲット側のルートハンドルと現在のハンドルを更新
-      this.rootHandles[targetSide] = this.rootHandles[sourceSide];
-      this.currentHandles[targetSide] = sourceHandle;
-      this.currentPaths[targetSide] = this.currentPaths[sourceSide];
+      // フォーカスを元のペインに戻す
+      this.focusPane(fromSide);
 
-      await this.loadDirectoryContents(targetSide);
-      this.updatePathDisplay(targetSide);
-
-      this.logMessage(`${sourceSide}ペインのディレクトリを${targetSide}ペインに同期しました`);
+      const message = `${fromSide}ペインのディレクトリを${toSide}ペインに同期しました`;
+      this.logMessage(message);
     } catch (error) {
       this.logError(error);
+    }
+  }
+
+  focusPane(pane) {
+    // フォーカスを指定されたペインに移動する処理
+    if (pane === 'left') {
+      const items = Array.from(this.leftPane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.focusFileItem(items[this.lastFocusedIndexes.left]);
+      }
+    } else if (pane === 'right') {
+      const items = Array.from(this.rightPane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.focusFileItem(items[this.lastFocusedIndexes.right]);
+      }
     }
   }
 
