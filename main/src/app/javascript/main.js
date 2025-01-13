@@ -322,52 +322,57 @@ class Main {
       const currentHandle = this.currentHandles[side];
       if (!currentHandle) return;
 
-      const currentPath = this.currentPaths[side];
-      const pathParts = currentPath.split('\\').filter(part => part);
+      // パスの正規化と完全パスの構築
+      let currentPath = this.currentPaths[side].replace(/^\\+/, '');
+      
+      // ルートディレクトリから開始していない場合、完全パスを構築
+      if (!this.currentPaths[side].includes(this.rootHandles[side].name)) {
+        const rootName = this.rootHandles[side].name;
+        if (!currentPath.startsWith(rootName)) {
+          currentPath = `${rootName}\\${currentPath}`;
+        }
+      }
 
-      // ルートディレクトリの場合
-      if (pathParts.length === 0) {
+      const pathParts = currentPath.split('\\').filter(part => part);
+      console.log('現在のパス:', currentPath);
+      console.log('パス要素:', pathParts);
+
+      // ルートディレクトリの判定
+      if (currentHandle === this.rootHandles[side] && pathParts.length <= 1) {
         this.logMessage('ルートディレクトリから先の階層へは移動できません。');
         return;
       }
 
-      // ルートディレクトリの直下の場合は、ルートディレクトリに戻る
-      if (pathParts.length === 1) {
+      // 現在のディレクトリの1つ上の階層に移動
+      let newHandle = this.rootHandles[side];
+      const targetPathParts = pathParts.slice(0, -1);
+
+      // ルートディレクトリへの移動
+      if (targetPathParts.length === 0 || 
+          (targetPathParts.length === 1 && targetPathParts[0] === this.rootHandles[side].name)) {
         this.currentHandles[side] = this.rootHandles[side];
         this.currentPaths[side] = this.rootHandles[side].name;
-        
-        await this.loadDirectoryContents(side);
-        this.updatePathDisplay(side);
-        
-        const pane = side === 'left' ? this.leftPane : this.rightPane;
-        const items = Array.from(pane.querySelectorAll('.file-item'));
-        if (items.length > 0) {
-          this.focusFileItem(items[0]);
-          this.lastFocusedPane = pane.closest('.pane');
-          this.lastFocusedIndexes[side] = 0;
+      } else {
+        // 目的のディレクトリまで順番に移動
+        for (const part of targetPathParts) {
+          if (part === this.rootHandles[side].name) continue; // ルートハンドル名はスキップ
+          console.log('移動中のパス:', part);
+          try {
+            newHandle = await newHandle.getDirectoryHandle(part);
+          } catch (error) {
+            this.logError(new Error(`ディレクトリの取得に失敗: ${part}`));
+            return;
+          }
         }
+
+        this.currentHandles[side] = newHandle;
         
-        this.logMessage(`移動したディレクトリ: ${this.rootHandles[side].name}`);
-        return;
+        // 表示用パスの生成
+        const displayPath = targetPathParts
+          .filter(part => part !== this.rootHandles[side].name)
+          .join('\\');
+        this.currentPaths[side] = displayPath || this.rootHandles[side].name;
       }
-
-      // 現在のパスから親ディレクトリのパスを生成
-      const parentPath = pathParts.slice(0, -1).join('\\');
-
-      let newHandle = this.rootHandles[side];
-      
-      // ルート以外の場合は該当パスまで移動
-      for (const part of pathParts.slice(0, -1)) {
-        try {
-          newHandle = await newHandle.getDirectoryHandle(part);
-        } catch (error) {
-          this.logError(new Error(`ディレクトリの取得に失敗しました: ${part}`));
-          return;
-        }
-      }
-      
-      this.currentHandles[side] = newHandle;
-      this.currentPaths[side] = parentPath;
 
       await this.loadDirectoryContents(side);
       this.updatePathDisplay(side);
@@ -380,7 +385,7 @@ class Main {
         this.lastFocusedIndexes[side] = 0;
       }
 
-      this.logMessage(`移動したディレクトリ: ${parentPath}`);
+      this.logMessage(`移動したディレクトリ: ${this.currentPaths[side]}`);
     } catch (error) {
       this.logError(error);
     }
