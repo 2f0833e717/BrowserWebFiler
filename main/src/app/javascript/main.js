@@ -322,21 +322,42 @@ class Main {
       const currentHandle = this.currentHandles[side];
       if (!currentHandle) return;
 
-      // ルートディレクトリに到達した場合は移動不可
-      if (currentHandle === this.rootHandles[side]) {
+      const currentPath = this.currentPaths[side];
+      const pathParts = currentPath.split('\\').filter(part => part);
+
+      // ルートディレクトリの場合
+      if (pathParts.length === 0) {
+        this.logMessage('ルートディレクトリから先の階層へは移動できません。');
+        return;
+      }
+
+      // ルートディレクトリの直下の場合は、ルートディレクトリに戻る
+      if (pathParts.length === 1) {
+        this.currentHandles[side] = this.rootHandles[side];
+        this.currentPaths[side] = this.rootHandles[side].name;
+        
+        await this.loadDirectoryContents(side);
+        this.updatePathDisplay(side);
+        
+        const pane = side === 'left' ? this.leftPane : this.rightPane;
+        const items = Array.from(pane.querySelectorAll('.file-item'));
+        if (items.length > 0) {
+          this.focusFileItem(items[0]);
+          this.lastFocusedPane = pane.closest('.pane');
+          this.lastFocusedIndexes[side] = 0;
+        }
+        
+        this.logMessage(`移動したディレクトリ: ${this.rootHandles[side].name}`);
         return;
       }
 
       // 現在のパスから親ディレクトリのパスを生成
-      const currentPath = this.currentPaths[side];
-      const pathParts = currentPath.split('\\');
-      pathParts.pop();
-      const parentPath = pathParts.join('\\');
+      const parentPath = pathParts.slice(0, -1).join('\\');
 
       let newHandle = this.rootHandles[side];
       
       // ルート以外の場合は該当パスまで移動
-      for (const part of pathParts.slice(1)) {
+      for (const part of pathParts.slice(0, -1)) {
         try {
           newHandle = await newHandle.getDirectoryHandle(part);
         } catch (error) {
@@ -351,7 +372,6 @@ class Main {
       await this.loadDirectoryContents(side);
       this.updatePathDisplay(side);
 
-      // 一つ上の階層に移動した後、最初のアイテムにフォーカスを設定
       const pane = side === 'left' ? this.leftPane : this.rightPane;
       const items = Array.from(pane.querySelectorAll('.file-item'));
       if (items.length > 0) {
@@ -360,7 +380,7 @@ class Main {
         this.lastFocusedIndexes[side] = 0;
       }
 
-      this.logMessage(`上の階層に移動: ${parentPath}`);
+      this.logMessage(`移動したディレクトリ: ${parentPath}`);
     } catch (error) {
       this.logError(error);
     }
