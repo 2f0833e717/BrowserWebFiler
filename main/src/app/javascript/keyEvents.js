@@ -11,6 +11,19 @@ function initializeKeyEvents(mainInstance) {
       // ポップアップ表示中で入力フィールドにフォーカスがある場合は通常のキー入力を許可
       return;
     }
+
+    // nキーの処理を先に行う
+    if (e.key === 'n') {
+      e.preventDefault();
+      const focusedPane = mainInstance.lastFocusedPane || document.querySelector('.left-pane');
+      if (focusedPane) {
+        const selectDirButton = focusedPane.querySelector('.select-dir');
+        if (selectDirButton) {
+          selectDirButton.click();
+        }
+      }
+      return;
+    }
     
     if (!focusedItem) return;
 
@@ -149,6 +162,9 @@ function initializeKeyEvents(mainInstance) {
           e.preventDefault();
           mainInstance.showCreateFilePopup();
         }
+        break;
+
+      default:
         break;
     }
   });
