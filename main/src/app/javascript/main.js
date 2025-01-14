@@ -72,6 +72,9 @@ class Main {
     
     // 履歴機能の初期化
     initializeHistoryOperations(this);
+
+    // フォルダ作成機能の初期化
+    initializeFolderOperations(this);
   }
 }
 

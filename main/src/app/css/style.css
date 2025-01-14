@@ -404,3 +404,19 @@ body {
   border-right: none;
   margin-right: 0;
 }
+
+.create-folder-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2b2b2b;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 8px;
+  width: 90%;
+  max-height: 80vh;
+  z-index: 1000;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}

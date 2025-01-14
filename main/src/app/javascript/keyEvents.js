@@ -133,6 +133,13 @@ function initializeKeyEvents(mainInstance) {
           }
         }
         break;
+
+      case 'K':
+        if (e.shiftKey) {
+          mainInstance.showCreateFolderPopup();
+          e.preventDefault();
+        }
+        break;
     }
   });
 }

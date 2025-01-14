@@ -27,6 +27,8 @@ function initializeDeleteOperations(mainInstance) {
 
       await handle.removeEntry(itemName, { recursive: true });
       await this.loadDirectoryContents(side);
+      const oppositeSide = side === 'left' ? 'right' : 'left';
+      await this.loadDirectoryContents(oppositeSide);
 
       const items = Array.from(pane.querySelectorAll('.file-item'));
       if (items.length > 0) {
