@@ -45,6 +45,7 @@ class Main {
 
     // ファイルとフォルダの処理の初期化
     initializeFileOperations(this);
+    initializeCopyOperations(this);  // 追加
     initializeMoveOperations(this);
 
     // 削除操作の初期化
