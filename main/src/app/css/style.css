@@ -27,42 +27,67 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    padding-bottom: 20vh;
+    padding-bottom: 2.5vh;
     overflow: hidden;
 }
 
 /* パス表示エリアの調整 */
 .path-display {
-  display: flex;
-  position: relative; /* 位置を固定 */
+  display: block;
   background: var(--background-color);
+  border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: 5px;
-  padding: 8px;
-  height: auto;
-  min-height: 50px;
-  flex-shrink: 0;
+  padding: 0;
+  height: 26px;
+  min-height: 26px;
 }
 
 .path-container {
-  flex: 1;
-  display: flex;
-  align-items: flex-start; /* 上揃え */
-  padding: 8px;
+  float: left;
+  width: 50%;
+  display: block;
+  margin: 0;
+  padding: 0;
   border-right: 1px solid var(--border-color);
+  height: 26px;
+  min-height: 26px;
+  box-sizing: border-box;
+}
+
+.path-container:last-child {
+  border-right: none;
+}
+
+/* clearfixを追加 */
+.path-display::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.path-left,
+.path-right {
+  display: block;
+  width: 100%;
+  height: 24px;
+  padding: 1;
+  margin: 1;
 }
 
 .current-path {
-  flex: 1;
+  display: block;
+  width: 100%;
+  height: 24px;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-all;
   font-family: monospace;
   font-size: 0.9rem;
-  padding: 4px 8px;
+  padding: 1;
+  margin: 1;
   background: var(--background-color);
   border: 1px solid var(--border-color);
-  border-radius: 2px;
+  border-radius: 0;
   color: var(--text-color);
   min-height: 24px;
   line-height: 24px;
@@ -73,15 +98,8 @@ body {
   display: flex;
   flex: 1;
   overflow: hidden;
-  height: calc(100vh - 20vh - 80px); /* パス表示領域とログエリアを考慮 */
+  height: calc(100vh - 2.5vh - 24px); /* パス表示の高さに合わせて調整 */
   min-height: 0;
-}
-
-.path-left, .path-right {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 100%;
 }
 
 .path-label {
@@ -103,12 +121,6 @@ body {
 .current-path::-webkit-scrollbar-thumb {
   background-color: #666;
   border-radius: 2px;
-}
-
-.path-left,
-.path-right {
-    flex: 1;
-    padding: 4px 8px;
 }
 
 .pane {
@@ -194,8 +206,8 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 20vh;
-    min-height: 100px;
+    height: 2.5vh;
+    min-height: 30px;
     max-height: 95vh;
     background-color: var(--background-color);
     border-top: 1px solid var(--border-color);
@@ -258,19 +270,23 @@ body {
 
     .path-display {
         flex-direction: column;
-        height: auto;
-        min-height: 200px; /* 両方のパスコンテナの高さ分 */
+        height: 48px; /* 24px × 2 */
+        min-height: 48px;
     }
 
     .path-container {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
-        padding: 8px;
-        min-height: 100px;
+        height: 24px;
+        min-height: 24px;
     }
 
     .path-container:last-child {
         border-bottom: none;
+    }
+
+    .file-manager {
+        height: calc(100vh - 2.5vh - 48px);
     }
 }
 
@@ -312,8 +328,8 @@ body {
   background: var(--background-color);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
-  padding: 8px;
-  min-height: 50px;
+  padding: 1px;
+  min-height: 25px;
 }
 
 /* ログエリアの調整 */
@@ -382,4 +398,9 @@ body {
 
 .history-item.selected {
   background: #0066cc;
+}
+
+.path-container:last-child {
+  border-right: none;
+  margin-right: 0;
 }
