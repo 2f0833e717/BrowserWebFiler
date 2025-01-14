@@ -3,10 +3,10 @@ function initializeKeyEvents(mainInstance) {
     const focusedItem = document.querySelector('.file-item.focused, .file-item.command-focused');
     // ポップアップが表示されているかチェック
     const historyPopup = document.querySelector('.history-popup');
-    if (historyPopup) {
-      // ポップアップ表示中は通常のキーイベントを無効化
-      e.preventDefault();
-      return; 
+    const createFolderPopup = document.querySelector('.create-folder-popup');
+    if (historyPopup || (createFolderPopup && document.activeElement.classList.contains('folder-name-input'))) {
+      // ポップアップ表示中で入力フィールドにフォーカスがある場合は通常のキー入力を許可
+      return;
     }
     
     if (!focusedItem) return;

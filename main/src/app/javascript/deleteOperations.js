@@ -26,16 +26,16 @@ function initializeDeleteOperations(mainInstance) {
       }
 
       await handle.removeEntry(itemName, { recursive: true });
-      await this.loadDirectoryContents(side);
-      const oppositeSide = side === 'left' ? 'right' : 'left';
-      await this.loadDirectoryContents(oppositeSide);
-
       const items = Array.from(pane.querySelectorAll('.file-item'));
       if (items.length > 0) {
         this.focusFileItem(items[0]);
         this.lastFocusedPane = pane.closest('.pane');
         this.lastFocusedIndexes[side] = 0;
       }
+
+      await this.loadDirectoryContents(side);
+      const oppositeSide = side === 'left' ? 'right' : 'left';
+      await this.loadDirectoryContents(oppositeSide);
 
       this.logMessage(`${itemName}を削除しました`);
       this.exitCommandMode();
