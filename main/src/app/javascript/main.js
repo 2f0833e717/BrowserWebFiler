@@ -75,6 +75,9 @@ class Main {
 
     // フォルダ作成機能の初期化
     initializeFolderOperations(this);
+
+    // ファイル作成機能の初期化
+    initializeFileOperations(this);
   }
 }
 

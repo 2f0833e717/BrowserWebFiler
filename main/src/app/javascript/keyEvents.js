@@ -4,7 +4,10 @@ function initializeKeyEvents(mainInstance) {
     // ポップアップが表示されているかチェック
     const historyPopup = document.querySelector('.history-popup');
     const createFolderPopup = document.querySelector('.create-folder-popup');
-    if (historyPopup || (createFolderPopup && document.activeElement.classList.contains('folder-name-input'))) {
+    if (historyPopup || (createFolderPopup && (
+      document.activeElement.classList.contains('folder-name-input') ||
+      document.activeElement.classList.contains('file-name-input')
+    ))) {
       // ポップアップ表示中で入力フィールドにフォーカスがある場合は通常のキー入力を許可
       return;
     }
@@ -138,6 +141,13 @@ function initializeKeyEvents(mainInstance) {
         if (e.shiftKey) {
           mainInstance.showCreateFolderPopup();
           e.preventDefault();
+        }
+        break;
+
+      case 'E':
+        if (e.shiftKey) {
+          e.preventDefault();
+          mainInstance.showCreateFilePopup();
         }
         break;
     }
