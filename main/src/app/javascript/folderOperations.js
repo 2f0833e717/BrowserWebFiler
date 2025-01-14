@@ -65,17 +65,27 @@ function initializeFolderOperations(mainInstance) {
       // フォルダを正しい場所に作成
       await currentHandle.getDirectoryHandle(folderName, { create: true });
 
-      // ペインを更新
-      await this.loadDirectoryContents('left');
-      await this.loadDirectoryContents('right');
+      // フォーカスを設定せずにペインを更新
+      await this.loadDirectoryContentsWithoutFocus(side);
+      const oppositeSide = side === 'left' ? 'right' : 'left';
+      await this.loadDirectoryContentsWithoutFocus(oppositeSide);
 
       // 新しいフォルダにフォーカスを設定
-      const newFolderItem = document.querySelector(`.file-item[data-name='${folderName}']`);
+      const fileList = pane.querySelector('.file-list');
+      const items = Array.from(fileList.querySelectorAll('.file-item'));
+      const newFolderItem = items.find(item => 
+        item.querySelector('.name').textContent === folderName
+      );
+
       if (newFolderItem) {
-        newFolderItem.focus();
+        this.focusFileItem(newFolderItem);
+        this.lastFocusedPane = pane;
+        this.lastFocusedIndexes[side] = items.indexOf(newFolderItem);
       }
+
+      this.logMessage(`フォルダ「${folderName}」を作成しました`);
     } catch (error) {
-      mainInstance.logError(`フォルダの作成に失敗しました: ${error.message}`);
+      this.logError(`フォルダの作成に失敗しました: ${error.message}`);
     }
   };
 }
