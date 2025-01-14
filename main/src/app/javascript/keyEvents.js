@@ -120,8 +120,17 @@ function initializeKeyEvents(mainInstance) {
       case 'h':
         if (!mainInstance.commandMode && mainInstance.lastFocusedPane) {
           e.preventDefault();
-          const side = mainInstance.lastFocusedPane.classList.contains('left-pane') ? 'left' : 'right';
-          mainInstance.showHistoryPopup(side);
+          const historyPopup = document.querySelector('.history-popup');
+          if (historyPopup) {
+            // 履歴ポップアップが表示されている場合は閉じる
+            historyPopup.remove();
+            // キーイベントハンドラも削除
+            document.removeEventListener('keydown', mainInstance.handleHistoryKeydown);
+          } else {
+            // 履歴ポップアップを表示
+            const side = mainInstance.lastFocusedPane.classList.contains('left-pane') ? 'left' : 'right';
+            mainInstance.showHistoryPopup(side);
+          }
         }
         break;
     }

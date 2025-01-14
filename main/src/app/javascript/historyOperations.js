@@ -66,7 +66,7 @@ function initializeHistoryOperations(mainInstance) {
     }
 
     // キーイベントハンドラ
-    const handleHistoryKeydown = async (e) => {
+    this.handleHistoryKeydown = async (e) => {
       e.stopPropagation(); // イベントの伝播を停止
       e.preventDefault(); // デフォルトの動作を防止
       
@@ -106,19 +106,20 @@ function initializeHistoryOperations(mainInstance) {
         case 'Enter':
           const selectedPath = history[currentIndex];
           popup.remove();
-          document.removeEventListener('keydown', handleHistoryKeydown);
+          document.removeEventListener('keydown', this.handleHistoryKeydown);
           await this.jumpToDirectory(side, selectedPath);
           break;
 
         case 'Escape':
+        case 'h':  // hキーでも閉じられるように追加
           popup.remove();
-          document.removeEventListener('keydown', handleHistoryKeydown);
+          document.removeEventListener('keydown', this.handleHistoryKeydown);
           break;
       }
     };
 
     // キーイベントハンドラを登録
-    document.addEventListener('keydown', handleHistoryKeydown);
+    document.addEventListener('keydown', this.handleHistoryKeydown);
 
     // ポップアップがクリックされたときのハンドラ
     popup.addEventListener('click', async (e) => {
@@ -135,7 +136,7 @@ function initializeHistoryOperations(mainInstance) {
 
       // ポップアップを閉じて履歴ジャンプを実行
       popup.remove();
-      document.removeEventListener('keydown', handleHistoryKeydown);
+      document.removeEventListener('keydown', this.handleHistoryKeydown);
       await this.jumpToDirectory(side, selectedPath);
     });
   };

@@ -38,15 +38,10 @@
 git commit -m "ファイル分割 1ログ"
 
 履歴Issues
-履歴窓に移動先のPathの表示の手前に番号を表示
-例）
-01: \\
-02: \\Project
-03: \\Project\roo-cline-ollama-01
-04: \\Project\roo-cline-ollama-01\debug-test-folder
-05: \\Project\roo-cline-ollama-01\debug-test-folder\top-folder-01
-06: \\Project\roo-cline-ollama-01\debug-test-folder\top-folder-01\middle-folder-01
-07: \\Project\roo-cline-ollama-01\debug-test-folder\top-folder-01\middle-folder-01\bottom-folder-02
+
+hキーでキャンセルになるように修正
+
+操作ログの表示位置の変更もう少し下に
 
 
 
