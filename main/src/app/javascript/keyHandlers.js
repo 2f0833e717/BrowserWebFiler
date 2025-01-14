@@ -109,7 +109,7 @@ function initializeKeyHandlers(mainInstance) {
         // 目的のディレクトリまで順番に移動
         for (const part of parentPathParts) {
           if (part === this.rootHandles[side].name) continue;
-          console.log('移動中のパス:', part);
+          // console.log('移動中のパス:', part);
           try {
             newHandle = await newHandle.getDirectoryHandle(part);
           } catch (error) {
