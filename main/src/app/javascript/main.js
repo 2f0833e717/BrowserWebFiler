@@ -34,6 +34,17 @@ class Main {
     initializeLog(this);
     this.initializeLogResize();
 
+    // ディレクトリ選択の初期化（最初に必要）
+    initializeDirectorySelection(this);
+
+    // ユーティリティ関数の初期化（多くの機能で使用）
+    initializeUtils(this);
+    initializeDirectoryUtils(this);
+
+    // フォルダとファイル作成機能の初期化
+    initializeFolderOperations(this);
+    initializeCreateFileOperations(this);
+
     // キーイベントの初期化
     initializeKeyEvents(this);
 
@@ -45,7 +56,7 @@ class Main {
 
     // ファイルとフォルダの処理の初期化
     initializeFileOperations(this);
-    initializeCopyOperations(this);  // 追加
+    initializeCopyOperations(this);
     initializeMoveOperations(this);
 
     // 削除操作の初期化
@@ -57,27 +68,14 @@ class Main {
     // キーハンドルの処理の初期化
     initializeKeyHandlers(this);
 
-    // ユーティリティ関数の初期化
-    initializeUtils(this);
-    initializeDirectoryUtils(this);
-
     // イベントリスナーの初期化
     initializeEventListeners(this);
 
     // ペイン切り替えの初期化
     initializePaneSwitch(this);
-
-    // ディレクトリ選択の初期化
-    initializeDirectorySelection(this);
     
     // 履歴機能の初期化
     initializeHistoryOperations(this);
-
-    // フォルダ作成機能の初期化
-    initializeFolderOperations(this);
-
-    // ファイル作成機能の初期化
-    initializeFileOperations(this);
   }
 }
 
