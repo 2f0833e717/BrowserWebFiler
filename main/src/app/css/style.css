@@ -337,7 +337,7 @@ body {
   }
 }
 
-/* 履歴ポップアップのスタイルを追加 */
+/* 履歴ポップアップのスタイルを修正 */
 .history-popup {
   position: fixed;
   top: 50%;
@@ -347,8 +347,7 @@ body {
   border: 1px solid #555;
   border-radius: 4px;
   padding: 8px;
-  min-width: 300px;
-  max-width: 80%;
+  width: 90%; /* 画面幅の90%に変更 */
   max-height: 80vh;
   z-index: 1000;
   color: #fff;
@@ -371,6 +370,9 @@ body {
   padding: 6px 8px;
   cursor: pointer;
   border-radius: 2px;
+  white-space: nowrap; /* パスを1行に表示 */
+  overflow: hidden;    /* はみ出した部分を隠す */
+  text-overflow: ellipsis; /* はみ出した部分を...で表示 */
 }
 
 .history-item:hover {
