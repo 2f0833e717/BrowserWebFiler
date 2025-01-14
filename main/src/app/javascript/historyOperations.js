@@ -155,6 +155,16 @@ function initializeHistoryOperations(mainInstance) {
       
       // 履歴に追加（重複を避けるため）
       this.addToHistory(side, path);
+
+      // フォーカスを設定
+      const pane = side === 'left' ? this.leftPane : this.rightPane;
+      const items = Array.from(pane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        // 最初のアイテムにフォーカスを設定
+        this.focusFileItem(items[0]);
+        this.lastFocusedPane = pane.closest('.pane');
+        this.lastFocusedIndexes[side] = 0;
+      }
       
       this.logMessage(`${side}ペイン: ${path} に移動しました`);
     } catch (error) {

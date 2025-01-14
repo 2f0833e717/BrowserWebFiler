@@ -3,7 +3,11 @@ function initializeKeyEvents(mainInstance) {
     const focusedItem = document.querySelector('.file-item.focused, .file-item.command-focused');
     // ポップアップが表示されているかチェック
     const historyPopup = document.querySelector('.history-popup');
-    if (historyPopup) return; // ポップアップ表示中は通常のキーイベントを無効化
+    if (historyPopup) {
+      // ポップアップ表示中は通常のキーイベントを無効化
+      e.preventDefault();
+      return; 
+    }
     
     if (!focusedItem) return;
 
