@@ -1,6 +1,10 @@
 function initializeKeyEvents(mainInstance) {
   document.addEventListener('keydown', async (e) => {
     const focusedItem = document.querySelector('.file-item.focused, .file-item.command-focused');
+    // ポップアップが表示されているかチェック
+    const historyPopup = document.querySelector('.history-popup');
+    if (historyPopup) return; // ポップアップ表示中は通常のキーイベントを無効化
+    
     if (!focusedItem) return;
 
     switch (e.key) {
@@ -106,6 +110,14 @@ function initializeKeyEvents(mainInstance) {
           const side = pane.classList.contains('left-pane') ? 'left' : 'right';
           await mainInstance.syncDirectory(side);
           e.preventDefault();
+        }
+        break;
+
+      case 'h':
+        if (!mainInstance.commandMode && mainInstance.lastFocusedPane) {
+          e.preventDefault();
+          const side = mainInstance.lastFocusedPane.classList.contains('left-pane') ? 'left' : 'right';
+          mainInstance.showHistoryPopup(side);
         }
         break;
     }

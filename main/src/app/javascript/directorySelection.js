@@ -14,6 +14,9 @@ function initializeDirectorySelection(mainInstance) {
       
       this.currentPaths[side] = handle.name;
       
+      // 選択したディレクトリを履歴に追加
+      this.addToHistory(side, handle.name);
+      
       await this.loadDirectoryContents(side);
       this.updatePathDisplay(side);
       

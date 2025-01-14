@@ -336,3 +336,47 @@ body {
     min-height: auto;
   }
 }
+
+/* 履歴ポップアップのスタイルを追加 */
+.history-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2b2b2b;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 8px;
+  min-width: 300px;
+  max-width: 80%;
+  max-height: 80vh;
+  z-index: 1000;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.history-header {
+  padding: 8px;
+  border-bottom: 1px solid #555;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.history-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.history-item {
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.history-item:hover {
+  background: #3f3f3f;
+}
+
+.history-item.selected {
+  background: #0066cc;
+}

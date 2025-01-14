@@ -69,6 +69,9 @@ class Main {
 
     // ディレクトリ選択の初期化
     initializeDirectorySelection(this);
+    
+    // 履歴機能の初期化
+    initializeHistoryOperations(this);
   }
 }
 

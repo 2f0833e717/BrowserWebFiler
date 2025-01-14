@@ -47,8 +47,11 @@ function initializeKeyHandlers(mainInstance) {
       this.currentHandles[side] = newHandle;
       
       const path = `${this.currentPaths[side]}\\${itemName}`;
-      
       this.currentPaths[side] = path;
+      
+      // 履歴に追加
+      this.addToHistory(side, path);
+      
       await this.loadDirectoryContents(side);
       this.updatePathDisplay(side);
       
@@ -103,6 +106,8 @@ function initializeKeyHandlers(mainInstance) {
           (parentPathParts.length === 1 && parentPathParts[0] === this.rootHandles[side].name)) {
         this.currentHandles[side] = this.rootHandles[side];
         this.currentPaths[side] = this.rootHandles[side].name;
+        // ルートディレクトリも履歴に追加
+        this.addToHistory(side, this.rootHandles[side].name);
       } else {
         let newHandle = this.rootHandles[side];
         
@@ -120,6 +125,8 @@ function initializeKeyHandlers(mainInstance) {
 
         this.currentHandles[side] = newHandle;
         this.currentPaths[side] = parentPath || this.rootHandles[side].name;
+        // 親ディレクトリを履歴に追加
+        this.addToHistory(side, this.currentPaths[side]);
       }
 
       await this.loadDirectoryContents(side);
