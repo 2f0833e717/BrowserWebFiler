@@ -31,11 +31,6 @@ git commit -m "ファイル分割 1ログ"
 
 
 
-loadDirectoryContentsCommonをそのままWithoutといっしょに統合
-loadDirectoryContentsを削除
-loadDirectoryContentsWithoutFocus
-
-
 
 【手動テストめも】
 フォルダを選択ボタンの動作確認
