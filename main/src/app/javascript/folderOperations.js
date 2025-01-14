@@ -26,7 +26,7 @@ function initializeFolderOperations(mainInstance) {
 
     // キーイベントハンドラ
     const handlePopupKeydown = (e) => {
-      if (e.key === 'Escape' || (e.key === 'K' && e.shiftKey)) {
+      if (e.key === 'Escape') {
         popup.remove();
         document.removeEventListener('keydown', handlePopupKeydown);
       }
