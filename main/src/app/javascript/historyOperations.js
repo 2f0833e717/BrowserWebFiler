@@ -51,7 +51,7 @@ function initializeHistoryOperations(mainInstance) {
       <div class="history-list">
         ${history.map((path, index) => `
           <div class="history-item" data-index="${index}">
-            ${path}
+            ${String(index + 1).padStart(2, '0')}: ${path}
           </div>
         `).join('')}
       </div>

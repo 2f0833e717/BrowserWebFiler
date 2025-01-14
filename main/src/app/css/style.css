@@ -373,6 +373,7 @@ body {
   white-space: nowrap; /* パスを1行に表示 */
   overflow: hidden;    /* はみ出した部分を隠す */
   text-overflow: ellipsis; /* はみ出した部分を...で表示 */
+  font-family: monospace; /* 等幅フォントで表示 */
 }
 
 .history-item:hover {
