@@ -5,6 +5,17 @@ function initializeHistoryOperations(mainInstance) {
   };
   
   mainInstance.addToHistory = function(side, path) {
+    // パスが空または未定義の場合は履歴に追加しない
+    if (!path || path.trim() === '') {
+      return;
+    }
+
+    // パスを正規化
+    path = path.replace(/^\\+|\\+$/g, '');
+    if (path !== this.rootHandles[side].name && !path.startsWith(this.rootHandles[side].name)) {
+      path = `${this.rootHandles[side].name}\\${path}`;
+    }
+
     const history = this.directoryHistory[side];
     // 同じパスが既に履歴にある場合は除去
     const index = history.indexOf(path);
@@ -110,21 +121,59 @@ function initializeHistoryOperations(mainInstance) {
     document.addEventListener('keydown', handleHistoryKeydown);
 
     // ポップアップがクリックされたときのハンドラ
-    popup.addEventListener('click', (e) => {
+    popup.addEventListener('click', async (e) => {
       const item = e.target.closest('.history-item');
       if (!item) return;
 
       const items = Array.from(popup.querySelectorAll('.history-item'));
       items.forEach(i => i.classList.remove('selected'));
       item.classList.add('selected');
+
+      // クリックされた項目のインデックスを取得
+      const currentIndex = parseInt(item.dataset.index);
+      const selectedPath = history[currentIndex];
+
+      // ポップアップを閉じて履歴ジャンプを実行
+      popup.remove();
+      document.removeEventListener('keydown', handleHistoryKeydown);
+      await this.jumpToDirectory(side, selectedPath);
     });
   };
 
   mainInstance.jumpToDirectory = async function(side, path) {
     try {
-      // パスをクリーンアップ
+      // パスが空または未定義の場合はルートディレクトリに移動
+      if (!path || path.trim() === '') {
+        if (this.rootHandles[side]) {
+          this.currentHandles[side] = this.rootHandles[side];
+          this.currentPaths[side] = this.rootHandles[side].name;
+          await this.loadDirectoryContents(side);
+          this.updatePathDisplay(side);
+          
+          // フォーカスを設定
+          const pane = side === 'left' ? this.leftPane : this.rightPane;
+          const items = Array.from(pane.querySelectorAll('.file-item'));
+          if (items.length > 0) {
+            this.focusFileItem(items[0]);
+            this.lastFocusedPane = pane.closest('.pane');
+            this.lastFocusedIndexes[side] = 0;
+          }
+
+          // ルートディレクトリのパスを履歴に追加
+          this.addToHistory(side, this.rootHandles[side].name);
+          
+          this.logMessage(`${side}ペイン: ルートディレクトリに移動しました`);
+          return;
+        } else {
+          throw new Error('ルートディレクトリが選択されていません');
+        }
+      }
+
+      // パスを正規化
       path = path.replace(/^\\+|\\+$/g, '');
-      const parts = path.split('\\').filter(part => part);
+      if (path !== this.rootHandles[side].name && !path.startsWith(this.rootHandles[side].name)) {
+        path = `${this.rootHandles[side].name}\\${path}`;
+      }
 
       // ルートディレクトリのチェック
       if (!this.rootHandles[side]) {
@@ -133,13 +182,15 @@ function initializeHistoryOperations(mainInstance) {
 
       let currentHandle = this.rootHandles[side];
       
-      // ルートディレクトリ名をスキップ
+      // パスの分割とフィルタリング
+      const parts = path.split('\\').filter(part => part);
       const rootName = this.rootHandles[side].name;
       const targetParts = parts.filter(part => part !== rootName);
 
       // 目的のディレクトリまで順番に移動
       for (const part of targetParts) {
         try {
+          if (!part) continue; // 空の部分をスキップ
           currentHandle = await currentHandle.getDirectoryHandle(part);
         } catch (error) {
           throw new Error(`ディレクトリ "${part}" が見つかりません`);
