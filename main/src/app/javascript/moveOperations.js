@@ -29,6 +29,14 @@ function initializeMoveOperations(mainInstance) {
           await refreshedSourceHandle.removeEntry(sourceName, { recursive: true });
         }
       } else {
+        const targetExists = await this.checkFileExists(refreshedTargetHandle, sourceName);
+        if (targetExists) {
+          if (!confirm(`移動先に「${sourceName}」が既に存在します。上書きしますか？`)) {
+            this.exitCommandMode();
+            return;
+          }
+          await refreshedTargetHandle.removeEntry(sourceName);
+        }
         await this.moveFileHandle(refreshedSourceHandle, refreshedTargetHandle, sourceName);
       }
 

@@ -52,10 +52,17 @@ function initializeKeyHandlers(mainInstance) {
       // 履歴に追加
       this.addToHistory(side, path);
       
-      await this.loadDirectoryContents(side);
+      // フォーカスを設定せずにディレクトリ内容を読み込む
+      await this.loadDirectoryContentsWithoutFocus(side);
       this.updatePathDisplay(side);
       
-      this.restoreFocusPosition(side);
+      // フォーカスを設定
+      const pane = side === 'left' ? this.leftPane : this.rightPane;
+      const items = Array.from(pane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.restoreFocusPosition(side);
+        this.lastFocusedPane = pane.closest('.pane');
+      }
       
       this.logMessage(`移動したディレクトリ: ${path}`);
     } catch (error) {
@@ -114,7 +121,6 @@ function initializeKeyHandlers(mainInstance) {
         // 目的のディレクトリまで順番に移動
         for (const part of parentPathParts) {
           if (part === this.rootHandles[side].name) continue;
-          // console.log('移動中のパス:', part);
           try {
             newHandle = await newHandle.getDirectoryHandle(part);
           } catch (error) {
@@ -129,7 +135,8 @@ function initializeKeyHandlers(mainInstance) {
         this.addToHistory(side, this.currentPaths[side]);
       }
 
-      await this.loadDirectoryContents(side);
+      // フォーカスを設定せずにディレクトリ内容を読み込む
+      await this.loadDirectoryContentsWithoutFocus(side);
       this.updatePathDisplay(side);
 
       // 親ディレクトリでの移動元ディレクトリ名の位置にフォーカスを設定
@@ -143,10 +150,10 @@ function initializeKeyHandlers(mainInstance) {
         this.focusFileItem(targetItem);
         this.lastFocusedPane = pane.closest('.pane');
         this.lastFocusedIndexes[side] = items.indexOf(targetItem);
-        console.log(`移動元ディレクトリにフォーカス - ${side}:`, currentDirName);
       } else {
         // 移動元ディレクトリが見つからない場合は保存されていた位置を復元
         this.restoreFocusPosition(side);
+        this.lastFocusedPane = pane.closest('.pane');
       }
 
       this.logMessage(`移動したディレクトリ: ${this.currentPaths[side]}`);

@@ -25,17 +25,23 @@ function initializeDeleteOperations(mainInstance) {
         return;
       }
 
-      await handle.removeEntry(itemName, { recursive: true });
       const items = Array.from(pane.querySelectorAll('.file-item'));
-      if (items.length > 0) {
-        this.focusFileItem(items[0]);
-        this.lastFocusedPane = pane.closest('.pane');
-        this.lastFocusedIndexes[side] = 0;
-      }
+      const currentIndex = items.indexOf(item);
+      const nextIndex = Math.min(currentIndex, items.length - 2);
 
-      await this.loadDirectoryContents(side);
+      await handle.removeEntry(itemName, { recursive: true });
+
+      await this.loadDirectoryContentsWithoutFocus(side);
       const oppositeSide = side === 'left' ? 'right' : 'left';
-      await this.loadDirectoryContents(oppositeSide);
+      await this.loadDirectoryContentsWithoutFocus(oppositeSide);
+
+      const updatedItems = Array.from(pane.querySelectorAll('.file-item'));
+      if (updatedItems.length > 0) {
+        const targetIndex = Math.min(nextIndex, updatedItems.length - 1);
+        this.focusFileItem(updatedItems[targetIndex]);
+        this.lastFocusedPane = pane.closest('.pane');
+        this.lastFocusedIndexes[side] = targetIndex;
+      }
 
       this.logMessage(`${itemName}を削除しました`);
       this.exitCommandMode();

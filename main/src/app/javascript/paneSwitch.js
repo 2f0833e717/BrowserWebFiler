@@ -4,7 +4,9 @@ function initializePaneSwitch(mainInstance) {
     if (this.lastFocusedPane) {
       const currentSide = this.lastFocusedPane.classList.contains('left-pane') ? 'left' : 'right';
       const items = Array.from(this.lastFocusedPane.querySelectorAll('.file-item'));
-      const currentIndex = items.findIndex(item => item.classList.contains('focused'));
+      const currentIndex = items.findIndex(item => 
+        item.classList.contains('focused') || item.classList.contains('command-focused')
+      );
       if (currentIndex !== -1) {
         this.lastFocusedIndexes[currentSide] = currentIndex;
       }
@@ -12,21 +14,15 @@ function initializePaneSwitch(mainInstance) {
 
     // 対象のペインに切り替え
     const targetPane = document.querySelector(`.${targetSide}-pane .file-list`);
-    this.lastFocusedPane = targetPane;
-
-    // 保存していたフォーカス位置を復元
     const items = Array.from(targetPane.querySelectorAll('.file-item'));
+    
     if (items.length > 0) {
       const targetIndex = Math.min(this.lastFocusedIndexes[targetSide], items.length - 1);
+      
+      // フォーカスを設定
       this.focusFileItem(items[targetIndex]);
-
-      // フォーカス表示を更新
-      document.querySelectorAll('.file-item').forEach(item => {
-        item.classList.remove('focused');
-      });
-      if (items[targetIndex]) {
-        items[targetIndex].classList.add('focused');
-      }
+      this.lastFocusedPane = targetPane.closest('.pane');
+      this.lastFocusedIndexes[targetSide] = targetIndex;
     }
   };
 }

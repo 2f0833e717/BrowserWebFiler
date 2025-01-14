@@ -48,13 +48,11 @@ function initializeDirectoryUtils(mainInstance) {
       // ディレクトリ読み込み後、フォーカスを設定
       const items = Array.from(pane.querySelectorAll('.file-item'));
       if (items.length > 0) {
-        // 保存されたフォーカス位置があればそれを使用、なければ最初のアイテム
         const savedIndex = this.focusHistory[side].get(this.currentPaths[side]);
         const targetIndex = savedIndex !== undefined ? 
           Math.min(savedIndex, items.length - 1) : 0;
-        
         this.focusFileItem(items[targetIndex]);
-        this.lastFocusedPane = pane.closest('.pane');
+        this.lastFocusedPane = side === 'left' ? this.leftPane : this.rightPane;
         this.lastFocusedIndexes[side] = targetIndex;
       }
     } catch (error) {
