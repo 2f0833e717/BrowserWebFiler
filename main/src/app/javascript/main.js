@@ -45,6 +45,10 @@ class Main {
 
     // ファイルとフォルダの処理の初期化
     initializeFileOperations(this);
+    initializeMoveOperations(this);
+
+    // 削除操作の初期化
+    initializeDeleteOperations(this);
 
     // ペイン同期の初期化
     initializePaneSync(this);
