@@ -28,46 +28,53 @@ body {
     flex-direction: column;
     height: 100vh;
     padding-bottom: 20vh;
+    overflow: hidden;
 }
 
-/* パス表示エリア */
+/* パス表示エリアの調整 */
 .path-display {
-    display: flex;
-    padding: 8px;
-    background-color: var(--secondary-color);
-    border-bottom: 1px solid var(--border-color);
-}
-
-/* パス表示エリア (main.cssからの統合) */
-.path-display {
+  display: flex;
+  position: relative; /* 位置を固定 */
   background: var(--background-color);
-  border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
-  height: 72px; /* 3行分の高さ (24px × 3) */
-  display: flex;
   margin-bottom: 5px;
-}
-
-/* パス表示エリアの高さ調整 */
-.path-display {
+  padding: 8px;
   height: auto;
-  min-height: 100px; /* 3行分 + パディング */
-  display: flex;
-  margin-bottom: 5px;
+  min-height: 50px;
+  flex-shrink: 0;
 }
 
 .path-container {
   flex: 1;
   display: flex;
-  align-items: center;
-  padding: 12px;
+  align-items: flex-start; /* 上揃え */
+  padding: 8px;
   border-right: 1px solid var(--border-color);
-  background: var(--secondary-color);
-  min-height: 100px;
 }
 
-.path-container:last-child {
-  border-right: none;
+.current-path {
+  flex: 1;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  color: var(--text-color);
+  min-height: 24px;
+  line-height: 24px;
+}
+
+/* ファイルマネージャーの配置調整 */
+.file-manager {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - 20vh - 80px); /* パス表示領域とログエリアを考慮 */
+  min-height: 0;
 }
 
 .path-left, .path-right {
@@ -83,24 +90,6 @@ body {
   color: var(--text-color);
   padding-right: 8px;
   user-select: none;
-}
-
-.current-path {
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-family: monospace;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  background: var(--background-color);
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  color: var(--text-color);
-  height: 76px; /* 3行分の高さ (行高24px × 3) + パディング */
-  min-height: 76px;
-  line-height: 24px;
 }
 
 .current-path::-webkit-scrollbar {
@@ -122,26 +111,12 @@ body {
     padding: 4px 8px;
 }
 
-/* ファイルマネージャーエリア */
-.file-manager {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-    min-height: 50px;
-    height: calc(100vh - 20vh - 50px);
-    overflow-y: auto;
-}
-
-/* ファイルマネージャーの高さ調整 */
-.file-manager {
-  height: calc(100vh - 230px) !important;
-}
-
 .pane {
     flex: 1;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-color);
+    min-height: 0;
 }
 
 .pane:last-child {
@@ -169,26 +144,48 @@ body {
     background-color: var(--hover-color);
 }
 
+/* スクロール時のフォーカス表示調整 */
 .file-list {
     flex: 1;
     overflow-y: auto;
     padding: 8px;
+    position: relative;
+    scroll-behavior: smooth;
 }
 
 .file-item {
-    padding: 4px 8px;
+    padding: 8px;
     cursor: pointer;
+    border: 1px solid transparent;
+    margin: 2px 0;
+    height: 36px; /* 固定の高さを設定 */
+    display: flex;
+    align-items: center;
 }
 
 .file-item.focused {
     background-color: var(--hover-color);
     border: 1px solid var(--primary-color);
+    scroll-margin: 100px;
+    scroll-behavior: smooth;
+    position: relative; /* 位置関係を明確に */
+    z-index: 1; /* 他の要素より前面に */
 }
 
 .file-item.command-focused {
     background-color: #5c2e2e; /* 濃い赤系の色 */
     border: 2px solid #ff4444;
     color: #ffffff;
+    scroll-margin: 100px;
+    scroll-behavior: smooth;
+    position: relative;
+    z-index: 1;
+}
+
+.file-item.focused,
+.file-item.command-focused {
+    position: relative;
+    z-index: 1;
 }
 
 /* ログエリア */
@@ -205,6 +202,7 @@ body {
     resize: none;
     overflow: hidden;
     z-index: 1000;
+    flex-shrink: 0;
 }
 
 .log-header {
@@ -282,4 +280,59 @@ body {
     left: 0;
     right: 0;
     z-index: 1000;
+}
+
+/* コンテナのレイアウト調整 */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ファイルマネージャーの調整 */
+.file-manager {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* 下部セクションの調整 */
+.bottom-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+}
+
+/* パス表示エリアの調整 */
+.path-display {
+  display: flex;
+  background: var(--background-color);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px;
+  min-height: 50px;
+}
+
+/* ログエリアの調整 */
+.log-container {
+  height: 20vh;
+  min-height: 100px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* レスポンシブ対応の調整 */
+@media (max-width: 768px) {
+  /* ...existing code... */
+
+  .bottom-section {
+    height: auto;
+  }
+
+  .path-display {
+    flex-direction: column;
+    min-height: auto;
+  }
 }

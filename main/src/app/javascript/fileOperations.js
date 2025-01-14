@@ -233,15 +233,17 @@ function initializeFileOperations(mainInstance) {
 
     try {
       const itemName = item.querySelector('.name').textContent;
-      const sourcePane = item.closest('.pane');
-      const sourceSide = sourcePane.classList.contains('left-pane') ? 'left' : 'right';
-      const targetSide = sourceSide === 'left' ? 'right' : 'left';
-
-      const sourceHandle = this.currentHandles[sourceSide];
-      const targetHandle = this.currentHandles[targetSide];
+      const { sourceSide, targetSide, sourceHandle, targetHandle } = this.getSourceAndTargetHandles(item);
 
       if (!sourceHandle || !targetHandle) {
         throw new Error('コピー元またはコピー先のディレクトリが選択されていません');
+      }
+
+      // 上書き確認
+      const targetExists = await this.checkFileExists(targetHandle, itemName);
+      if (targetExists && !confirm(`ファイル「${itemName}」は既に存在します。上書きしますか？`)) {
+        this.exitCommandMode();
+        return;
       }
 
       const sourceFile = await sourceHandle.getFileHandle(itemName);
@@ -266,15 +268,22 @@ function initializeFileOperations(mainInstance) {
 
     try {
       const itemName = item.querySelector('.name').textContent;
-      const sourcePane = item.closest('.pane');
-      const sourceSide = sourcePane.classList.contains('left-pane') ? 'left' : 'right';
-      const targetSide = sourceSide === 'left' ? 'right' : 'left';
-
-      const sourceHandle = this.currentHandles[sourceSide];
-      const targetHandle = this.currentHandles[targetSide];
+      const { sourceSide, targetSide, sourceHandle, targetHandle } = this.getSourceAndTargetHandles(item);
 
       if (!sourceHandle || !targetHandle) {
         throw new Error('コピー元またはコピー先のディレクトリが選択されていません');
+      }
+
+      // 上書き確認
+      const targetExists = await this.checkDirectoryExists(targetHandle, itemName);
+      if (targetExists && !confirm(`フォルダ「${itemName}」は既に存在します。上書きしますか？`)) {
+        this.exitCommandMode();
+        return;
+      }
+
+      if (targetExists) {
+        await targetHandle.removeEntry(itemName, { recursive: true });
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       const sourceDir = await sourceHandle.getDirectoryHandle(itemName);
@@ -441,6 +450,15 @@ function initializeFileOperations(mainInstance) {
     } catch (error) {
       this.logError(new Error(`ディレクトリハンドルの更新に失敗: ${error.message}`));
       return null;
+    }
+  };
+
+  mainInstance.checkFileExists = async function(parent, name) {
+    try {
+      await parent.getFileHandle(name);
+      return true;
+    } catch {
+      return false;
     }
   };
 }

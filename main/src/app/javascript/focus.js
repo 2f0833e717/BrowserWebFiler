@@ -20,11 +20,38 @@ function initializeFocus(mainInstance) {
       this.lastFocusedPane = pane;
       const side = pane.classList.contains('left-pane') ? 'left' : 'right';
       const items = Array.from(pane.querySelectorAll('.file-item'));
-      this.lastFocusedIndexes[side] = items.indexOf(item);
-    }
+      const currentIndex = items.indexOf(item);
+      this.lastFocusedIndexes[side] = currentIndex;
 
-    // スクロール位置の調整
-    item.scrollIntoView({ block: 'nearest' });
+      // ビューポートの状態を確認
+      const fileList = item.closest('.file-list');
+      const itemRect = item.getBoundingClientRect();
+      const viewportRect = fileList.getBoundingClientRect();
+      const itemFullyVisible = 
+        itemRect.top >= viewportRect.top && 
+        itemRect.bottom <= viewportRect.bottom;
+
+      // アイテムが完全に表示されていない場合のみスクロール
+      if (!itemFullyVisible) {
+        let newScrollTop;
+        
+        if (itemRect.bottom > viewportRect.bottom) {
+          // 下部が見切れている場合
+          newScrollTop = fileList.scrollTop + (itemRect.bottom - viewportRect.bottom);
+        } else if (itemRect.top < viewportRect.top) {
+          // 上部が見切れている場合
+          newScrollTop = fileList.scrollTop + (itemRect.top - viewportRect.top);
+        }
+
+        // スクロールが必要な場合のみ実行
+        if (newScrollTop !== undefined) {
+          fileList.scrollTo({
+            top: newScrollTop,
+            behavior: 'smooth'
+          });
+        }
+      }
+    }
   };
 
   mainInstance.saveFocusPosition = function(side) {
