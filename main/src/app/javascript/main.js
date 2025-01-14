@@ -42,7 +42,7 @@ class Main {
     initializeDirectoryUtils(this);
 
     // フォルダとファイル作成機能の初期化
-    initializeFolderOperations(this);
+    initializeCreateFolderOperations(this);
     initializeCreateFileOperations(this);
 
     // キーイベントの初期化

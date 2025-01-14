@@ -1,4 +1,4 @@
-function initializeFolderOperations(mainInstance) {
+function initializeCreateFolderOperations(mainInstance) {
   mainInstance.showCreateFolderPopup = function() {
     // 既存のポップアップを削除
     const existingPopup = document.querySelector('.create-folder-popup');
@@ -91,4 +91,4 @@ function initializeFolderOperations(mainInstance) {
 }
 
 // グローバルスコープに追加
-window.initializeFolderOperations = initializeFolderOperations; 
+window.initializeCreateFolderOperations = initializeCreateFolderOperations; 
