@@ -119,6 +119,20 @@ function initializeFileOperations(mainInstance) {
         }
       }
 
+      // ペイン移動を実行
+      this.switchPane(targetParent === this.currentHandles.left ? 'left' : 'right');
+
+      // フォーカスを設定
+      const targetPane = document.querySelector(`.${targetParent === this.currentHandles.left ? 'left' : 'right'}-pane .file-list`);
+      const items = Array.from(targetPane.querySelectorAll('.file-item'));
+      const movedItem = items.find(item => item.querySelector('.name').textContent === dirName);
+
+      if (movedItem) {
+        this.focusFileItem(movedItem);
+        this.lastFocusedPane = targetPane.closest('.pane');
+        this.lastFocusedIndexes[targetParent === this.currentHandles.left ? 'left' : 'right'] = items.indexOf(movedItem);
+      }
+
       return success;
     } catch (error) {
       throw new Error(`ディレクトリ ${dirName} の移動中にエラー: ${error.message}`);
@@ -254,9 +268,7 @@ function initializeFileOperations(mainInstance) {
       await writable.write(file);
       await writable.close();
 
-      await this.loadDirectoryContents(targetSide);
-      this.logMessage(`${itemName}を${sourceSide}から${targetSide}にコピーしました`);
-      this.exitCommandMode();
+      await this.updateUIAfterOperation(sourceSide, targetSide, itemName, 'コピー');
     } catch (error) {
       this.logError(error);
       this.exitCommandMode();
@@ -289,9 +301,7 @@ function initializeFileOperations(mainInstance) {
       const sourceDir = await sourceHandle.getDirectoryHandle(itemName);
       await this.copyDirectoryRecursive(sourceDir, targetHandle, itemName);
 
-      await this.loadDirectoryContents(targetSide);
-      this.logMessage(`${itemName}を${sourceSide}から${targetSide}にコピーしました`);
-      this.exitCommandMode();
+      await this.updateUIAfterOperation(sourceSide, targetSide, itemName, 'コピー');
     } catch (error) {
       this.logError(error);
       this.exitCommandMode();
@@ -459,6 +469,21 @@ function initializeFileOperations(mainInstance) {
       return true;
     } catch {
       return false;
+    }
+  };
+
+  mainInstance.focusPane = function(pane) {
+    // フォーカスを指定されたペインに移動する処理
+    if (pane === 'left') {
+      const items = Array.from(this.leftPane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.focusFileItem(items[this.lastFocusedIndexes.left]);
+      }
+    } else if (pane === 'right') {
+      const items = Array.from(this.rightPane.querySelectorAll('.file-item'));
+      if (items.length > 0) {
+        this.focusFileItem(items[this.lastFocusedIndexes.right]);
+      }
     }
   };
 }

@@ -122,7 +122,7 @@ class Main {
     }
 
     // 対象のペインに切り替え
-    const targetPane = document.querySelector(`.${targetSide}-pane`);
+    const targetPane = document.querySelector(`.${targetSide}-pane .file-list`);
     this.lastFocusedPane = targetPane;
 
     // 保存していたフォーカス位置を復元
@@ -130,6 +130,14 @@ class Main {
     if (items.length > 0) {
       const targetIndex = Math.min(this.lastFocusedIndexes[targetSide], items.length - 1);
       this.focusFileItem(items[targetIndex]);
+
+      // フォーカス表示を更新
+      document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.remove('focused');
+      });
+      if (items[targetIndex]) {
+        items[targetIndex].classList.add('focused');
+      }
     }
   }
 
