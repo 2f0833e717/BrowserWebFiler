@@ -28,4 +28,4 @@ function initializePaneSwitch(mainInstance) {
 }
 
 // グローバルスコープに追加
-window.initializePaneSwitch = initializePaneSwitch;
+window.initializePaneSwitch = initializePaneSwitch; 

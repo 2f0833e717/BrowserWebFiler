@@ -31,4 +31,4 @@ function initializeCommandMode(mainInstance) {
 }
 
 // グローバルスコープに追加
-window.initializeCommandMode = initializeCommandMode;
+window.initializeCommandMode = initializeCommandMode; 

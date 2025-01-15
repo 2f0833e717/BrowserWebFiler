@@ -64,4 +64,4 @@ function initializePaneSync(mainInstance) {
 }
 
 // グローバルスコープに追加
-window.initializePaneSync = initializePaneSync;
+window.initializePaneSync = initializePaneSync; 
