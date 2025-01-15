@@ -201,4 +201,4 @@ function initializeMoveOperations(mainInstance) {
   };
 }
 
-window.initializeMoveOperations = initializeMoveOperations;
+window.initializeMoveOperations = initializeMoveOperations; 

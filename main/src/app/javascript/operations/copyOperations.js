@@ -80,4 +80,4 @@ function initializeCopyOperations(mainInstance) {
   };
 }
 
-window.initializeCopyOperations = initializeCopyOperations;
+window.initializeCopyOperations = initializeCopyOperations; 

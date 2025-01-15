@@ -225,4 +225,4 @@ function initializeHistoryOperations(mainInstance) {
   };
 }
 
-window.initializeHistoryOperations = initializeHistoryOperations;
+window.initializeHistoryOperations = initializeHistoryOperations; 

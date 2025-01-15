@@ -52,4 +52,4 @@ function initializeDeleteOperations(mainInstance) {
   };
 }
 
-window.initializeDeleteOperations = initializeDeleteOperations;
+window.initializeDeleteOperations = initializeDeleteOperations; 

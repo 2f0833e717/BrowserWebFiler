@@ -107,4 +107,4 @@ function initializeFileOperations(mainInstance) {
   };
 }
 
-window.initializeFileOperations = initializeFileOperations;
+window.initializeFileOperations = initializeFileOperations; 
