@@ -57,11 +57,19 @@ function initializeKeyHandlers(mainInstance) {
       this.updatePathDisplay(side);
       
       // フォーカスを設定
-      const pane = side === 'left' ? this.leftPane : this.rightPane;
+      const pane = document.querySelector(`.${side}-pane`);
       const items = Array.from(pane.querySelectorAll('.file-item'));
       if (items.length > 0) {
-        this.restoreFocusPosition(side);
-        this.lastFocusedPane = pane.closest('.pane');
+        // フォーカスを一番上のアイテムに設定
+        this.focusFileItem(items[0]);
+        this.lastFocusedPane = pane;
+        this.lastFocusedIndexes[side] = 0;
+        
+        // フォーカスが外れないように明示的にフォーカスを設定
+        items[0].classList.add('focused');
+        if (this.commandMode) {
+          items[0].classList.add('command-focused');
+        }
       }
       
       this.logMessage(`移動したディレクトリ: ${path}`);
@@ -91,8 +99,6 @@ function initializeKeyHandlers(mainInstance) {
       }
 
       const pathParts = currentPath.split('\\').filter(part => part);
-      console.log('現在のパス:', currentPath);
-      console.log('パス要素:', pathParts);
 
       // ルートディレクトリの判定
       if (currentHandle === this.rootHandles[side] && pathParts.length <= 1) {
@@ -106,7 +112,6 @@ function initializeKeyHandlers(mainInstance) {
       // 親ディレクトリのパスを生成
       const parentPathParts = pathParts.slice(0, -1);
       const parentPath = parentPathParts.join('\\');
-      console.log('親ディレクトリパス:', parentPath);
 
       // ルートディレクトリへの移動
       if (parentPathParts.length === 0 || 
@@ -140,20 +145,36 @@ function initializeKeyHandlers(mainInstance) {
       this.updatePathDisplay(side);
 
       // 親ディレクトリでの移動元ディレクトリ名の位置にフォーカスを設定
-      const pane = side === 'left' ? this.leftPane : this.rightPane;
+      const pane = document.querySelector(`.${side}-pane`);
       const items = Array.from(pane.querySelectorAll('.file-item'));
       const targetItem = items.find(item => 
         item.querySelector('.name').textContent === currentDirName
       );
 
       if (targetItem) {
+        const targetIndex = items.indexOf(targetItem);
         this.focusFileItem(targetItem);
-        this.lastFocusedPane = pane.closest('.pane');
-        this.lastFocusedIndexes[side] = items.indexOf(targetItem);
+        this.lastFocusedPane = pane;
+        this.lastFocusedIndexes[side] = targetIndex;
+        
+        // フォーカスが外れないように明示的にフォーカスを設定
+        targetItem.classList.add('focused');
+        if (this.commandMode) {
+          targetItem.classList.add('command-focused');
+        }
       } else {
-        // 移動元ディレクトリが見つからない場合は保存されていた位置を復元
-        this.restoreFocusPosition(side);
-        this.lastFocusedPane = pane.closest('.pane');
+        // 移動元ディレクトリが見つからない場合は最初のアイテムにフォーカスを設定
+        if (items.length > 0) {
+          this.focusFileItem(items[0]);
+          this.lastFocusedPane = pane;
+          this.lastFocusedIndexes[side] = 0;
+          
+          // フォーカスが外れないように明示的にフォーカスを設定
+          items[0].classList.add('focused');
+          if (this.commandMode) {
+            items[0].classList.add('command-focused');
+          }
+        }
       }
 
       this.logMessage(`移動したディレクトリ: ${this.currentPaths[side]}`);

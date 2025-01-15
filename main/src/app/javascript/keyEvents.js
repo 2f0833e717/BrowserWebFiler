@@ -128,7 +128,7 @@ function initializeKeyEvents(mainInstance) {
         if (e.shiftKey) {
           const pane = focusedItem.closest('.pane');
           const side = pane.classList.contains('left-pane') ? 'left' : 'right';
-          await mainInstance.syncDirectory(side);
+          await mainInstance.syncPanes();
           e.preventDefault();
         }
         break;
