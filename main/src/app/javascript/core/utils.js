@@ -1,10 +1,14 @@
 function initializeUtils(mainInstance) {
   mainInstance.updatePathDisplay = function(side) {
     const pathElement = document.querySelector(`.path-${side} .current-path`);
-    pathElement.textContent = this.currentPaths[side] || '';
+    if (pathElement) {
+      pathElement.textContent = this.currentPaths[side] || '';
+    }
   };
 
   mainInstance.renderFileList = function(pane, entries) {
+    if (!pane) return;
+    
     pane.innerHTML = '';
     // 「..」追加
     const upEntry = { name: '..', isDirectory: true };
@@ -24,10 +28,6 @@ function initializeUtils(mainInstance) {
       pane.appendChild(element);
     });
   };
-
-  // 初期化時にパス表示を更新
-  mainInstance.updatePathDisplay('left');
-  mainInstance.updatePathDisplay('right');
 }
 
 // グローバルスコープに追加

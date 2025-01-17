@@ -6,23 +6,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QUnit テスト結果</title>
     <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.17.2.css">
-    <link rel="stylesheet" href="css/test-style.css">
+    <link rel="stylesheet" href="css/test-dark.css">
 </head>
 
 <body>
     <div id="qunit"></div>
     <div id="qunit-fixture"></div>
-    <div class="test-info">
-        <h3>テスト実行情報</h3>
-        <div id="testStartTime" class="time-info">開始時刻: </div>
-        <div id="testEndTime" class="time-info">終了時刻: </div>
-        <div id="testDuration" class="time-info">実行時間: </div>
-    </div>
+    <div id="test-time-container"></div>
 
+    <!-- QUnitとテストユーティリティの読み込み -->
     <script src="https://code.jquery.com/qunit/qunit-2.17.2.js"></script>
-    <script src="js/testUtils.js"></script>
-    <script src="js/testReporter.js"></script>
-    <script src="js/fileOperationsTest.js"></script>
+    <script src="testUtils.js"></script>
+    <script src="js/testMocks.js"></script>
+
+    <!-- アプリケーションのJavaScriptファイルを読み込み -->
+    <script src="../app/javascript/core/utils.js"></script>
+    <script src="../app/javascript/core/log.js"></script>
+    <script src="../app/javascript/core/directoryUtils.js"></script>
+    <script src="../app/javascript/core/directorySelection.js"></script>
+    <script src="../app/javascript/core/main.js"></script>
+
+    <!-- テストモジュールの読み込み -->
+    <script src="js/core/utils.test.js"></script>
+    <script src="js/core/log.test.js"></script>
+    <script src="js/core/directoryUtils.test.js"></script>
+    <script src="js/core/directorySelection.test.js"></script>
+    <script src="js/core/main.test.js"></script>
+    <script src="js/events/keyEvents.test.js"></script>
+    <script src="js/events/uiEvents.test.js"></script>
+    <script src="js/operations/fileOperations.test.js"></script>
+
+    <!-- テスト実行の設定と初期化 -->
+    <script>
+        const timeManager = new TestTimeManager();
+        const mockFS = new MockFileSystem();
+
+        // QUnitの設定
+        QUnit.config.testTimeout = 5000;
+        QUnit.config.reorder = false;  // テストの順序を保持
+
+        // テスト開始時の処理
+        QUnit.begin(() => {
+            timeManager.initialize();
+            // ブラウザAPIのモックを設定
+            window.showOpenFilePicker = mockFS.mockShowOpenFilePicker.bind(mockFS);
+            window.showDirectoryPicker = mockFS.mockShowDirectoryPicker.bind(mockFS);
+            console.log('テスト実行を開始します...');
+        });
+
+        // テスト完了時の処理
+        QUnit.done(function (details) {
+            timeManager.updateEndTime();
+            console.log(`
+=== テスト実行結果 ===
+合計テスト数: ${details.total}
+成功: ${details.passed}
+失敗: ${details.failed}
+スキップ: ${details.skipped}
+実行時間: ${details.runtime}ms
+==================
+            `);
+            // テスト結果の保存
+            setTimeout(saveTestResult, 100);
+        });
+
+        // モジュール開始時の処理
+        QUnit.moduleStart(function (details) {
+            console.log(`モジュール "${details.name}" のテストを開始します...`);
+        });
+
+        // モジュール完了時の処理
+        QUnit.moduleDone(function (details) {
+            console.log(`
+モジュール "${details.name}" の実行結果:
+成功: ${details.passed}
+失敗: ${details.failed}
+合計: ${details.total}
+            `);
+        });
+    </script>
 </body>
 
 </html>
