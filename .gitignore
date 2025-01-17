@@ -1,0 +1,29 @@
+# Project specific files
+test-file.txt
+commit-memo.txt
+ai-memo.txt
+
+# Cursor rules
+.cursorrules
+old.cursorrules
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Debug and local development
+*.log
+debug/
+temp/
