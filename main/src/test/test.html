@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUnit テスト結果</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.17.2.css">
+    <link rel="stylesheet" href="css/test-style.css">
+</head>
+
+<body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+    <div class="test-info">
+        <h3>テスト実行情報</h3>
+        <div id="testStartTime" class="time-info">開始時刻: </div>
+        <div id="testEndTime" class="time-info">終了時刻: </div>
+        <div id="testDuration" class="time-info">実行時間: </div>
+    </div>
+
+    <script src="https://code.jquery.com/qunit/qunit-2.17.2.js"></script>
+    <script src="js/testUtils.js"></script>
+    <script src="js/testReporter.js"></script>
+    <script src="js/fileOperationsTest.js"></script>
+</body>
+
+</html>

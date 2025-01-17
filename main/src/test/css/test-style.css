@@ -1,0 +1,64 @@
+body {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#qunit {
+    background-color: #2d2d2d;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.test-info {
+    background-color: #2d2d2d;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.time-info {
+    margin: 10px 0;
+    color: #00ff00;
+    font-family: monospace;
+}
+
+#qunit-tests li {
+    background-color: #333333;
+    border-bottom: 1px solid #444444;
+}
+
+#qunit-tests li.pass {
+    background-color: #143214;
+}
+
+#qunit-tests li.fail {
+    background-color: #321414;
+}
+
+#qunit-testresult {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+.qunit-assert-list {
+    background-color: #383838;
+}
+
+#qunit-tests .runtime {
+    color: #888888;
+}
+
+#qunit-banner.qunit-pass {
+    background-color: #143214;
+}
+
+#qunit-banner.qunit-fail {
+    background-color: #321414;
+}
+
+h3 {
+    color: #4CAF50;
+    margin-bottom: 15px;
+} 
