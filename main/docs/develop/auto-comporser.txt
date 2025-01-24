@@ -1,0 +1,171 @@
+# Windows APIの定義
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+
+public class WindowsAPI {
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern void keybd_event(byte bVk, byte bScan, int dwFlags, int dwExtraInfo);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    public static extern bool BringWindowToTop(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int processId);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+
+    [DllImport("imm32.dll")]
+    public static extern IntPtr ImmGetDefaultIMEWnd(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+    public const int KEYEVENTF_KEYUP = 0x0002;
+    public const int VK_RETURN = 0x0D;
+    public const int SW_SHOW = 5;
+    public const uint WM_IME_CONTROL = 0x0283;
+    public const int IMC_SETOPENSTATUS = 0x0006;
+}
+"@
+
+function Find-VSCodeWindow {
+    $processes = Get-Process | Where-Object { $_.MainWindowTitle -match "- Cursor$" }
+    if ($processes) {
+        $window = $processes | Select-Object -First 1
+        Write-Host "Cursorウィンドウを検出しました: $($window.MainWindowTitle)"
+        Write-Host "ウィンドウハンドル: $($window.MainWindowHandle)"
+        return $window.MainWindowHandle
+    }
+    else {
+        Write-Host "Cursorウィンドウが見つかりませんでした"
+        return [IntPtr]::Zero
+    }
+}
+
+function Send-KeyboardInput {
+    param(
+        [IntPtr]$hwnd,
+        [string]$message
+    )
+    
+    try {
+        Write-Host "Setting window focus..."
+        [WindowsAPI]::ShowWindow($hwnd, [WindowsAPI]::SW_SHOW)
+        Start-Sleep -Milliseconds 500
+        [WindowsAPI]::BringWindowToTop($hwnd)
+        Start-Sleep -Milliseconds 500
+        
+        if ([WindowsAPI]::SetForegroundWindow($hwnd)) {
+            $currentWindow = [WindowsAPI]::GetForegroundWindow()
+            if ($currentWindow -eq $hwnd) {
+                Write-Host "Focus set successfully"
+                
+                # チャットパネルにフォーカス
+                Write-Host "Moving focus to chat panel (Ctrl + Shift + Y)"
+                [System.Windows.Forms.SendKeys]::SendWait("^+Y")
+                Start-Sleep -Milliseconds 500
+                
+                # Composerにフォーカス
+                Write-Host "Moving focus to composer (Ctrl + I)"
+                [System.Windows.Forms.SendKeys]::SendWait("^i")
+                Start-Sleep -Milliseconds 500
+
+                # IMEを無効化
+                Write-Host "Disabling IME..."
+                $imeWnd = [WindowsAPI]::ImmGetDefaultIMEWnd($hwnd)
+                [WindowsAPI]::SendMessage($imeWnd, [WindowsAPI]::WM_IME_CONTROL, [IntPtr]::new([WindowsAPI]::IMC_SETOPENSTATUS), [IntPtr]::Zero)
+                Start-Sleep -Milliseconds 500
+                
+                Write-Host "Sending message: $message"
+                [System.Windows.Forms.SendKeys]::SendWait($message)
+                Start-Sleep -Milliseconds 1000  # メッセージ入力完了後の待機時間を延長
+                
+                Write-Host "Sending Enter keys..."
+                [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+                Start-Sleep -Milliseconds 500
+                [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+                Start-Sleep -Milliseconds 500
+                [System.Windows.Forms.SendKeys]::SendWait("~")  # 別の方法でEnterを送信
+                Start-Sleep -Milliseconds 500
+                
+                Write-Host "Keyboard operation completed"
+                return $true
+            }
+            else {
+                Write-Host "Failed to verify focus"
+            }
+        }
+        else {
+            Write-Host "SetForegroundWindow failed"
+        }
+    }
+    catch {
+        Write-Host "Error during window operation: $_"
+    }
+    return $false
+}
+
+# Windows Formsアセンブリの読み込み
+Add-Type -AssemblyName System.Windows.Forms
+
+# テストHTMLファイルのパスを設定
+$htmlPath = "roo-cline-ollama-01/main/test/runTests.html"
+
+# テストHTMLファイルを起動
+Write-Host "テストHTMLファイルを起動します: $htmlPath"
+Start-Process $htmlPath
+
+# test-results.jsonの監視を開始
+Write-Host "テスト結果の監視を開始します..."
+Write-Host "監視対象: test-results.json"
+
+$prevHash = ''
+$firstUpdate = $true
+
+while ($true) {
+    if (Test-Path "test-results.json") {
+        $hash = Get-FileHash "test-results.json" -Algorithm MD5 | Select-Object -ExpandProperty Hash
+        
+        if ($hash -ne $prevHash) {
+            if ($firstUpdate) {
+                Write-Host "`n最初のテスト結果を検知しました。次回の更新を待機します..."
+                $firstUpdate = $false
+            }
+            else {
+                Write-Host "`n=== テスト結果が更新されました ==="
+                
+                try {
+                    $results = Get-Content "test-results.json" -Encoding UTF8 | ConvertFrom-Json
+                    Write-Host "Test results loaded successfully"
+                    Write-Host "Results content: $($results | ConvertTo-Json)"
+                    $summary = "Test Results Updated - Please check test-results.json"
+                    
+                    $hwnd = Find-VSCodeWindow
+                    Write-Host "Window search completed"
+                    if ($hwnd -ne [IntPtr]::Zero) {
+                        if (-not (Send-KeyboardInput $hwnd $summary)) {
+                            Write-Host "Window operation failed"
+                        }
+                    }
+                }
+                catch {
+                    Write-Host "エラー: テスト結果のJSONパースに失敗しました: $_"
+                }
+            }
+            $prevHash = $hash
+        }
+    }
+    Start-Sleep -Seconds 1
+} 
