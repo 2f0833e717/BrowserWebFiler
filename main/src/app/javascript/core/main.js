@@ -54,6 +54,9 @@ class Main {
     // コマンドモードの初期化
     initializeCommandMode(this);
 
+    // ヘルプ機能の初期化
+    initializeHelp(this);
+
     // ファイルとフォルダの処理の初期化
     initializeFileOperations(this);
     initializeCopyOperations(this);

@@ -164,9 +164,44 @@ function initializeKeyEvents(mainInstance) {
         }
         break;
 
+      case '?':
+        if (e.shiftKey) {
+          e.preventDefault();
+          mainInstance.showKeyboardHelp();
+          return;
+        }
+        break;
+
       default:
         break;
     }
+  });
+}
+
+// ヘルプメッセージを表示する関数を追加
+function showKeyboardHelp(mainInstance) {
+  const helpMessages = [
+    'n: フォルダを選択',
+    'Space: コマンドモードの切り替え',
+    'm: ファイル/フォルダの移動',
+    'c: ファイル/フォルダのコピー',
+    'd: ファイル/フォルダの削除',
+    'Enter: フォルダに移動',
+    'Escape: コマンドモードを終了',
+    '←: 左ペインに移動/親ディレクトリに移動',
+    '→: 右ペインに移動/親ディレクトリに移動',
+    '↑/↓: ファイル選択の移動',
+    'PageUp: 最初のファイルに移動',
+    'PageDown: 最後のファイルに移動',
+    'Shift + O: 反対側のペインを同期',
+    'h: ディレクトリ履歴を表示',
+    'Shift + K: 新規フォルダを作成',
+    'Shift + E: 新規ファイルを作成',
+    'Shift + ?: このヘルプを表示'
+  ];
+
+  helpMessages.forEach(message => {
+    mainInstance.logMessage(message);
   });
 }
 

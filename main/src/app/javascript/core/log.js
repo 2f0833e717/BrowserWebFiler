@@ -23,49 +23,65 @@ function initializeLog(mainInstance) {
     let isDragging = false;
     let startY;
     let startHeight;
+    let currentHeight;
 
-    logHeader.addEventListener('mousedown', (e) => {
-      // ヘッダーの上部領域でドラッグ
+    // ドラッグ開始時の処理
+    const startDragging = (e) => {
+      // ヘッダーの上部10px領域でのみドラッグを開始
       if (e.offsetY <= 10) {
         isDragging = true;
         startY = e.clientY;
         startHeight = logContainer.offsetHeight;
+        currentHeight = startHeight;
         document.body.style.cursor = 'ns-resize';
+        e.preventDefault();
       }
-    });
+    };
 
-    document.addEventListener('mousemove', (e) => {
+    // ドラッグ中の処理
+    const doDrag = (e) => {
       if (!isDragging) return;
 
       const deltaY = startY - e.clientY;
-      const newHeight = Math.min(
-        Math.max(startHeight + deltaY, 0), // 最小高さ100px
-        window.innerHeight * 1 // 最大高さ画面80%
+      currentHeight = Math.min(
+        Math.max(startHeight + deltaY, 30), // 最小高さ30px
+        window.innerHeight * 0.95 // 最大高さ画面の95%
       );
 
-      logContainer.style.height = `${newHeight}px`;
-      document.querySelector('.app-container').style.paddingBottom = `${newHeight}px`;
-      document.querySelector('.file-manager').style.height = 
-        `calc(100vh - ${newHeight}px - 50px)`;
+      // CSSカスタムプロパティを更新
+      document.documentElement.style.setProperty('--log-height', `${currentHeight}px`);
+      
+      // コンテナの高さを設定
+      logContainer.style.height = `${currentHeight}px`;
 
       e.preventDefault();
-    });
+    };
 
-    document.addEventListener('mouseup', () => {
+    // ドラッグ終了時の処理
+    const stopDragging = () => {
       if (isDragging) {
         isDragging = false;
         document.body.style.cursor = '';
+        
+        // 高さを確定
+        if (currentHeight) {
+          logContainer.style.height = `${currentHeight}px`;
+        }
       }
-    });
+    };
 
-    // ダブルクリックで高さデフォルト
+    // イベントリスナーの設定
+    logHeader.addEventListener('mousedown', startDragging);
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDragging);
+
+    // ダブルクリックでデフォルトサイズに戻す
     logHeader.addEventListener('dblclick', (e) => {
       if (e.offsetY <= 10) {
-        const defaultHeight = window.innerHeight * 0.2; // 20vh
+        const defaultHeight = Math.max(window.innerHeight * 0.2, 30); // 20vhまたは最小30px
+        currentHeight = defaultHeight;
         logContainer.style.height = `${defaultHeight}px`;
-        document.querySelector('.app-container').style.paddingBottom = `${defaultHeight}px`;
-        document.querySelector('.file-manager').style.height = 
-          `calc(100vh - ${defaultHeight}px - 50px)`;
+        document.documentElement.style.setProperty('--log-height', `${defaultHeight}px`);
       }
     });
   };

@@ -27,7 +27,6 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    padding-bottom: 2.5vh;
     overflow: hidden;
 }
 
@@ -95,11 +94,10 @@ body {
 
 /* ファイルマネージャーの配置調整 */
 .file-manager {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-  height: calc(100vh - 2.5vh - 24px); /* パス表示の高さに合わせて調整 */
-  min-height: 0;
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
 }
 
 .path-label {
@@ -206,15 +204,18 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 2.5vh;
+    height: var(--log-height, 2.5vh);
     min-height: 30px;
     max-height: 95vh;
     background-color: var(--background-color);
     border-top: 1px solid var(--border-color);
-    resize: none;
+    resize: none; /* JavaScriptで制御するためresizeプロパティは無効化 */
     overflow: hidden;
     z-index: 1000;
+    display: flex;
+    flex-direction: column;
     flex-shrink: 0;
+    transition: height 0.1s ease; /* スムーズな高さ変更のためのトランジション */
 }
 
 .log-header {
@@ -223,12 +224,14 @@ body {
     border-bottom: 1px solid var(--border-color);
     position: relative;
     user-select: none;
+    flex-shrink: 0;
+    height: 37px;
 }
 
 .log-header::before {
     content: '';
     position: absolute;
-    top: -5px;
+    top: 0;
     left: 0;
     right: 0;
     height: 10px;
@@ -236,13 +239,15 @@ body {
 }
 
 .log-content {
-    height: calc(100% - 37px);
+    flex: 1;
     padding: 8px;
     overflow-y: auto;
-    font-family: monospace;
-    font-size: 0.8rem;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
     background-color: var(--background-color);
     color: var(--text-color);
+    min-height: 0;
+    white-space: pre;
 }
 
 /* レスポンシブ対応 */
@@ -261,11 +266,7 @@ body {
     }
 
     .app-container {
-        padding-bottom: 25vh;
-    }
-
-    .file-manager {
-        height: calc(100vh - 25vh - 50px);
+        overflow: hidden;
     }
 
     .path-display {
@@ -304,14 +305,6 @@ body {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-}
-
-/* ファイルマネージャーの調整 */
-.file-manager {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-  min-height: 0;
 }
 
 /* 下部セクションの調整 */
